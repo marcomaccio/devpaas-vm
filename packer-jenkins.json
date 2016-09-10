@@ -70,6 +70,18 @@
     {
       "type": "shell",
       "scripts": [
+          "scripts/jenkins/graphviz.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+          "scripts/git.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
           "scripts/jenkins/jenkins.sh"
       ]
     }
