@@ -1,6 +1,7 @@
 #!/bin/bash -e
 echo "IMAGE CREATION PART ..."
-echo date
+
+date
 
 echo "Packaging Jenkins Server..."
 packer build packer-jenkins.json
@@ -32,4 +33,4 @@ echo "VM CREATION PART ..."
 
 echo "VM CREATION PART ended successfully !"
 
-echo date
+date
