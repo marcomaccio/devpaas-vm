@@ -23,6 +23,10 @@ echo "Packaging Sonarqube Server..."
 
 echo "Sonarqube Server Packaged !"
 
+echo "Packaging Elastic, Logstash, Kibana (ELK) Server..."
+packer build packer-jenkins.json
+echo "Elastic, Logstash, Kibana (ELK) Server Packaged !"
+
 echo "Packaging NGINX Server..."
 
 echo "NGINX Server Packaged !"
