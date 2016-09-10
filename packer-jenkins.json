@@ -1,4 +1,7 @@
 {
+  "variables": {
+		"atlas_token": "ATLAS_TOKEN_HERE"
+	},
   "builders": [
     {
       "type": "virtualbox-iso",
@@ -96,6 +99,15 @@
       "type": "vagrant",
       "output": "{{.Provider}}-mm-srv-elk.box",
       "only": ["virtualbox-iso"]
-    }
+    },
+    {
+			"type": "atlas",
+			"artifact": "marcomaccio/mm-jenkins",
+			"artifact_type": "vagrant.box",
+			"metadata": {
+				"provider": "virtualbox"
+			},
+			"only": ["virtualbox-iso"]
+		}
   ]
 }
