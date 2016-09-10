@@ -1,8 +1,9 @@
 #!/bin/bash -e
 echo "IMAGE CREATION PART ..."
+echo date
 
 echo "Packaging Jenkins Server..."
-
+packer build packer-jenkins.json
 echo "Jenkins Server Packaged !"
 
 echo "Packaging Agilefant Server..."
@@ -30,3 +31,5 @@ echo "IMAGE CREATION PART ended successfully !"
 echo "VM CREATION PART ..."
 
 echo "VM CREATION PART ended successfully !"
+
+echo date
