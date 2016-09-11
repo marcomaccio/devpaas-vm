@@ -1,0 +1,4 @@
+.DS_Store
+*.tar.gz
+packer_cache/
+virtualbox-*.box

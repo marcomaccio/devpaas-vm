@@ -4,6 +4,7 @@ echo "IMAGE CREATION PART ..."
 date
 
 echo "Packaging Jenkins Server..."
+rm -rf output-virtualbox-iso
 packer build packer-jenkins.json
 echo "Jenkins Server Packaged !"
 
@@ -24,6 +25,7 @@ echo "Packaging Sonarqube Server..."
 echo "Sonarqube Server Packaged !"
 
 echo "Packaging Elastic, Logstash, Kibana (ELK) Server..."
+rm -rf output-virtualbox-iso
 packer build packer-jenkins.json
 echo "Elastic, Logstash, Kibana (ELK) Server Packaged !"
 
