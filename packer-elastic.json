@@ -77,7 +77,7 @@
           "scripts/elk/kibana.sh",
           "scripts/elk/logstash.sh"
       ]
-    },
+    }
   ],
   "post-processors": [
     {
