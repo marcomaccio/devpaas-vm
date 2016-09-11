@@ -82,12 +82,12 @@
   "post-processors": [
     {
       "type": "compress",
-      "output": "mm-srv-elk.tar.gz",
+      "output": "mm-elk.tar.gz",
       "only": ["virtualbox-iso"]
     },
     {
       "type": "vagrant",
-      "output": "{{.Provider}}-mm-srv-elk.box",
+      "output": "{{.Provider}}-mm-elk.box",
       "only": ["virtualbox-iso"]
     },
     {
