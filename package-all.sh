@@ -26,7 +26,7 @@ echo "Sonarqube Server Packaged !"
 
 echo "Packaging Elastic, Logstash, Kibana (ELK) Server..."
 rm -rf output-virtualbox-iso
-packer build packer-jenkins.json
+packer build packer-elastic.json
 echo "Elastic, Logstash, Kibana (ELK) Server Packaged !"
 
 echo "Packaging NGINX Server..."
