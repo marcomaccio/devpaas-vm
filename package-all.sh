@@ -5,6 +5,8 @@ date
 
 echo "Packaging Jenkins Server..."
 rm -rf output-virtualbox-iso
+rm -f mm-jenkins.tar.gz
+rm -f virtualbox-mm-jenkins.box 
 packer build packer-jenkins.json
 echo "Jenkins Server Packaged !"
 
@@ -26,6 +28,8 @@ echo "Sonarqube Server Packaged !"
 
 echo "Packaging Elastic, Logstash, Kibana (ELK) Server..."
 rm -rf output-virtualbox-iso
+rm -f mm-elk.tar.gz
+rm -f virtualbox-mm-elk.box
 packer build packer-elastic.json
 echo "Elastic, Logstash, Kibana (ELK) Server Packaged !"
 
