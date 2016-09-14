@@ -30,7 +30,7 @@ echo "Packaging Elastic, Logstash, Kibana (ELK) Server..."
 rm -rf output-virtualbox-iso
 rm -f mm-elk.tar.gz
 rm -f virtualbox-mm-elk.box
-packer build packer-elastic.json
+packer build packer-elk.json
 echo "Elastic, Logstash, Kibana (ELK) Server Packaged !"
 
 echo "Packaging NGINX Server..."
