@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<biz.neustar.jenkins.plugins.packer.PackerPublisher_-DescriptorImpl plugin="packer@1.4">
+  <installations>
+    <biz.neustar.jenkins.plugins.packer.PackerInstallation>
+      <name>packer-0.12.2</name>
+      <home></home>
+      <properties>
+        <hudson.tools.InstallSourceProperty>
+          <installers>
+            <biz.neustar.jenkins.plugins.packer.PackerInstaller>
+              <id>0.12.2-linux-amd64</id>
+            </biz.neustar.jenkins.plugins.packer.PackerInstaller>
+          </installers>
+        </hudson.tools.InstallSourceProperty>
+      </properties>
+      <packerHome></packerHome>
+      <params></params>
+      <jsonTemplateText></jsonTemplateText>
+      <templateModeJsonObj>
+        <nullObject>false</nullObject>
+        <properties class="org.apache.commons.collections.map.ListOrderedMap" serialization="custom">
+          <unserializable-parents/>
+          <org.apache.commons.collections.map.ListOrderedMap>
+            <default>
+              <insertOrder>
+                <string>value</string>
+                <string>jsonTemplateText</string>
+              </insertOrder>
+            </default>
+            <map>
+              <entry>
+                <string>jsonTemplateText</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>value</string>
+                <string>text</string>
+              </entry>
+            </map>
+          </org.apache.commons.collections.map.ListOrderedMap>
+        </properties>
+      </templateModeJsonObj>
+      <templateMode>text</templateMode>
+    </biz.neustar.jenkins.plugins.packer.PackerInstallation>
+  </installations>
+</biz.neustar.jenkins.plugins.packer.PackerPublisher_-DescriptorImpl>

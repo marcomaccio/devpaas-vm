@@ -1,0 +1,214 @@
+{
+  "variables": {
+    "atlas_username":           "",
+    "atlas_token":              "",
+
+    "home":                     "{{env `HOME`}}",
+
+    "instance_name":            "mm-devpaas-nexus3-v{{isotime \"20060102-0101\"}}",
+    "image_name":               "mm-devpaas-nexus3-v{{isotime \"20060102-0101\"}}",
+    "image_description":        "MM DevPaas Nexus3 Ubuntu 16.04 VM Image",
+    "image_version":            "0.1",
+
+    "aws_ssh_username":         "",
+    "aws_ssh_keypair_name":     "",
+    "aws_ssh_private_key_file": "",
+
+    "aws_region":               "",
+    "aws_vpc_id":               "",
+    "aws_subnet_id":            "",
+    "aws_source_image":         "",
+    "aws_instance_type":        "",
+    "aws_security_groups":      "",
+
+    "gcp_account_file":         "",
+    "gcp_project_id":           "",
+    "gcp_project_name":         "",
+    "gcp_zone":                 "",
+    "gcp_ssh_username":         "",
+    "gcp_source_image":         "",
+
+    "vbox_ssh_username":          "",
+    "vbox_ssh_password":          ""
+  },
+  "builders": [
+    {
+      "type":                     "amazon-ebs",
+
+      "ami_virtualization_type":  "hvm",
+      "ami_name":                 "{{ user `image_name`         }}",
+      "ami_description":          "{{ user `image_description`  }} AMI",
+
+      "ssh_pty":                  "true",
+      "ssh_username":             "{{ user `aws_ssh_username`         }}",
+      "ssh_keypair_name":         "{{ user `aws_ssh_keypair_name`     }}",
+      "ssh_private_key_file":     "{{ user `aws_ssh_private_key_file` }}",
+
+      "region":                   "{{ user `aws_region` }}",
+      "vpc_id":                   "{{ user `aws_vpc_id` }}",
+      "subnet_id":                "{{ user `aws_subnet_id` }}",
+      "source_ami":               "{{ user `aws_source_image` }}",
+      "instance_type":            "{{ user `aws_instance_type` }}",
+      "security_group_id":        "{{ user `aws_security_groups` }}",
+
+      "run_tags":         { "ami-create": "{{ user `image_name`}}" },
+      "tags":             { "ami": "{{ user `image_name`}}"},
+
+      "associate_public_ip_address": true
+
+    },
+    {
+      "type":                     "googlecompute",
+
+      "image_name":               "{{ user `image_name` }}",
+      "image_description":        "{{ user `image_description` }}",
+
+      "account_file":             "{{ user `gcp_account_file` }}",
+      "project_id":               "{{ user `gcp_project_id` }}",
+
+      "zone":                     "{{ user `gcp_zone` }}",
+      "source_image":             "{{ user `gcp_source_image` }}",
+      "instance_name":            "{{ user `instance_name` }}",
+
+      "ssh_username":             "{{ user `gcp_ssh_username` }}",
+
+      "communicator":             "ssh"
+    },
+    {
+      "type": "virtualbox-iso",
+      "guest_os_type":      "Ubuntu_64",
+      "format":             "ova",
+      "headless":           true,
+      "http_directory":     "http",
+
+      "disk_size":          81920,
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+      "ssh_pty" :           true,
+
+      "iso_checksum_type":  "sha256",
+      "iso_checksum":       "a06cd926f5855d4f21fb4bc9978a35312f815fbda0d0ef7fdc846861f4fc4600",
+      "iso_url":            "http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso",
+
+      "boot_wait": "10s",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname=mm-devpaas-nexus3-ubuntu<wait>",
+        " netcfg/get_domain=marmac.labs<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+
+      "shutdown_command":   "echo 'packer' | sudo -S shutdown -P now",
+      "virtualbox_version_file":  ".vbox_version",
+      "guest_additions_path":     "VBoxGuestAdditions_{{.Version}}.iso",
+      "vm_name":                  "{{user `instance_name`}}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "3072" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  ,    "2" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "jenkins  ,tcp,,8090,,8080" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "nexus    ,tcp,,8081,,8081" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "sonarqube,tcp,,9000,,9000" ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/virtualbox/virtualbox-ubuntu.sh",
+        "scripts/vagrant.sh"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type":   "shell",
+      "scripts": [
+        "scripts/serverspec/create-serverspec-temp-dirs.sh",
+        "scripts/nexus/create-nexus-temp-dirs.sh"
+      ]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/serverspec/configs/",
+      "destination":  "/tmp/serverspec/"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/nexus/configs/",
+      "destination":  "/tmp/nexus/resources/"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/nexus/configs/nexus3",
+      "destination":  "/tmp/nexus/resources/nexus3"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/nexus/tests/",
+      "destination":  "/tmp/nexus/tests/"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os_update-ubuntu.sh",
+        "scripts/serverspec/serverspec-core-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/java/java-jdk-ubuntu.sh",
+        "scripts/graphviz/graphviz-ubuntu.sh",
+        "scripts/git/git-ubuntu.sh",
+        "scripts/nexus/nexus3-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/serverspec/serverspec-nexus.sh",
+        "scripts/serverspec/serverspec-launch-test.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type":   "compress",
+      "output": "build/{{user `image_name`}}.tar.gz",
+      "only":   ["virtualbox-iso"]
+    },
+    [
+      {
+        "type":   "vagrant",
+        "output": "build/{{.Provider}}-{{ user `image_name` }}.box",
+        "only":   ["virtualbox-iso"]
+      },
+      {
+        "type":         "vagrant-cloud",
+        "box_tag":      "marcomaccio/{{ user `image_name` }}",
+        "access_token": "{{user `atlas_token`}}",
+        "version":      "{{user `image_version`}}.{{timestamp}}",
+        "only":         ["virtualbox-iso"]
+      }
+    ]
+  ]
+}
