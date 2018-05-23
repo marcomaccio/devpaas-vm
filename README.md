@@ -1,4 +1,13 @@
-# Creation VM with Packer
+# DEVPAAS-VM
+
+## Goals
+Goal of this repo is create a Development Platform using 2 main DevOps principles:
+* Infrastructure As Code
+* Immutable Infrastructure
+
+This repo focus on Virtual Machine usage to create the infrastructure and it presents a way to handle the creation of basic services useful for the Development.
+
+## Description
 
 ## Prerequisites
 In order to use the scripts in this repo the following softwares should be installed:
@@ -99,7 +108,11 @@ brew cask install terraform
 
 This repo is organized in the following way:
 
+| Directory | Description |   Documentation     |
+|-----------|-------------|-------------------------|
+| packer    | it holds all the packer templates, bash scripts, resources, config files to create automated images | [packer templates](./packer/README.md) |
+| terraform | it holds all the terraform script, bash scripts, resources, config files to create infrastructure for different providers | [terraform templates](./terraform/README.md) |
+| vagrant   | it holds all the vagrant script, bash scripts, resources, config files to create VMs for different providers based on images created with packer | [vagrant templates](./vagrant/README.md) |
+| jenkins   | it holds all jenkins pipeline (declarative)  | [jenkins pipelines](./jenkins/README.md) |
 
-## VMs Template availables
 
- 
