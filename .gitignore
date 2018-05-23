@@ -1,28 +1,38 @@
 .DS_Store
 
 *.tar.gz
-devpaas-vm/packer/packer_cache/
-devpaas-vm/packer/packer_logs/
-devpaas-vm/packer/builds/
-devpaas-vm/packer/http/preseed-*.cfg
 
+# Key Files
+*.pem
+
+#Google Cloud Platform key files
 gcp_accountfile.json
 
+# VirtualBox Files
 *.mf
-*.box
 *.vdi
 *.vmdk
 *.ovf
 *.ova
+
+# Packer Files
+packer/packer_cache/
+packer/packer_logs/
+packer/builds/
+packer/http/preseed-*.cfg
+
+# Vagrant Files
+.vagrant/
+*.box
+
+# Terraform Files
+.terraform/
 *.tfstate
 *.tfstate.backup
 *.plan
 *.terraform
-*.pem
 
-.vagrant/
-.terraform/
-
+# JetBrain IntelliJ files
 *.iml
 .idea/inspectionProfiles
 .idea/sonarlint/
@@ -36,4 +46,5 @@ gcp_accountfile.json
 .idea/misc.xml
 .idea/codeStyles/Project.xml
 
+# Visual Studo Code files
 .vscode/

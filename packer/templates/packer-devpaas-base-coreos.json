@@ -1,0 +1,156 @@
+{
+  "variables": {
+
+    "home":                       "{{env `HOME`}}",
+
+    "base_image_name":            "mm-devpaas-base-coreos",
+    "instance_name":              "{{ user `base_image_name`}}-v{{isotime \"20060102-0101\"}}",
+    "image_name":                 "{{ user `base_image_name`}}-v{{isotime \"20060102-0101\"}}",
+    "image_description":          "",
+    "image_version":              "",
+
+    "aws_ssh_keypair_name":       "",
+    "aws_ssh_private_key_file":   "",
+    "aws_ssh_username":           "",
+
+    "aws_region":                 "",
+    "aws_vpc_id":                 "",
+    "aws_subnet_id":              "",
+    "aws_instance_type":          "",
+    "aws_source_image":           "",
+
+    "gcp_project_id":             "",
+    "gcp_account_file":           "",
+    "gcp_zone":                   "",
+    "gcp_source_image":           "",
+    "gcp_ssh_username":           "",
+
+    "vbox_ssh_username":          "",
+    "vbox_ssh_password":          ""
+  },
+  "builders": [
+    {
+      "type":                     "amazon-ebs",
+
+      "ami_virtualization_type":  "hvm",
+      "ami_name":                 "{{ user `image_name`         }}",
+      "ami_description":          "{{ user `image_description`  }} AMI",
+
+      "ssh_pty":                  "true",
+      "ssh_keypair_name":         "{{ user `aws_ssh_keypair_name`     }}",
+      "ssh_private_key_file":     "{{ user `aws_ssh_private_key_file` }}",
+      "ssh_username":             "{{ user `aws_ssh_username`         }}",
+
+      "region":                   "{{ user `aws_region` }}",
+      "vpc_id":                   "{{ user `aws_vpc_id` }}",
+      "subnet_id":                "{{ user `aws_subnet_id` }}",
+      "source_ami":               "{{ user `aws_source_image` }}",
+      "instance_type":            "{{ user `aws_instance_type` }}",
+
+      "run_tags":         { "ami-create": "{{ user ``}}" },
+      "tags":             { "ami": "{{ user ``}}"},
+
+      "associate_public_ip_address": false
+
+    },
+    {
+      "type":                     "googlecompute",
+
+      "image_name":               "coreos-{{user `channel`}}-{{user `coreos_human_version`}}-kube-{{user `kube_human_version`}}-{{timestamp}}",
+      "image_name":               "{{ user `image_name` }}",
+      "image_description":        "{{ user `image_description` }}",
+
+      "project_id":               "{{ user `gcp_project_id`   }}",
+      "ssh_username":             "{{ user `gcp_ssh_username` }}",
+      "account_file":             "{{ user `gcp_account_file` }}",
+
+      "zone":                     "{{ user `gcp_zone` }}",
+      "source_image":             "{{ user `gcp_source_image` }}",
+      "instance_name":            "{{ user `instance_name` }}",
+
+      "communicator":             "ssh"
+
+    },
+    {
+      "type": "virtualbox-iso",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+
+      "boot_wait": "10s",
+      "boot_command": [
+        "sudo -i<enter>",
+        "systemctl stop sshd.socket<enter>",
+        "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.yml<enter>",
+        "coreos-install -d /dev/sda -C {{user `channel`}} -c install.yml<enter>",
+        "reboot<enter>"
+      ],
+
+      "iso_checksum": "{{user `checksum`}}",
+      "iso_checksum_type": "{{user `checksum_type`}}",
+      "iso_url": "http://{{user `channel`}}.release.core-os.net/amd64-usr/{{user `coreos_version`}}/coreos_production_iso_image.iso",
+
+      "guest_os_type":      "Linux26_64",
+      "http_directory":     "http",
+
+      "shutdown_command": "sudo -S shutdown -P now",
+      "output_directory": "build/coreos-{{user `channel`}}-{{user `coreos_human_version`}}-kube-{{user `kube_human_version`}}-virtualbox",
+
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "3072" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  ,    "2" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ]
+      ],
+
+      "format": "ova",
+      "headless": "false"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+          "#scripts/virtualbox/virtualbox-coreos.sh",
+          "scripts/vagrant.sh"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/serverspec/configs/",
+      "destination":  "/tmp/serverspec/"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/java-jdk-ubuntu.sh",
+        "scripts/jenkins/graphviz-ubuntu.sh",
+        "scripts/git-ubuntu.sh",
+        "scripts/serverspec/serverspec-core-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant'|sudo -S bash '{{.Path}}'",
+      "scripts": [
+        "scripts/cleanup-ubuntu.sh"
+      ]
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type":   "compress",
+      "output": "build/{{user `base_image_name`}}.tar.gz",
+      "only":   ["virtualbox-iso"]
+    },
+    {
+      "type":   "vagrant",
+      "output": "build/{{.Provider}}-{{ user `base_image_name` }}.box",
+      "only":   ["virtualbox-iso"]
+    }
+  ]
+}
