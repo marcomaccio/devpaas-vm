@@ -1,5 +1,7 @@
 {
   "variables": {
+    "atlas_username":           "",
+    "atlas_token":              "",
 
     "home":                     "{{env `HOME`}}",
 
@@ -7,11 +9,11 @@
     "image_iso_checksum":       "",
     "image_iso_checksum_type":  "",
 
-    "image_output_name":        "mm-base-ubuntu-server-1604",
-    "image_output_description": "MM Base Ubuntu Server 16.04 VM Image",
+    "image_output_name":        "",
+    "image_output_description": "",
     "image_output_version":     "",
 
-    "instance_name":            "mm-base-ubuntu-server-1604",
+    "instance_name":            "",
     "instance_domain_name":     "",
 
     "aws_ssh_username":         "",
@@ -107,7 +109,7 @@
       ]
     },
     {
-      "type": "virtualbox-iso",
+      "type":               "virtualbox-iso",
       "guest_os_type":      "Ubuntu_64",
 
       "export_opts": [
@@ -166,14 +168,26 @@
       ]
     },
     {
-      "type":               "hyperv-iso",
+      "type":               "vmware-iso",
+      "guest_os_type":      "Ubuntu_64",
+
+      "format":             "ovf",
+
+      "headless":           true,
+      "http_directory":     "http",
+
+      "disk_size":          81920,
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+      "ssh_pty" :           true,
+
       "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
       "iso_checksum":       "{{ user `image_iso_checksum` }}",
       "iso_url":            "{{ user `image_iso_url` }}",
 
-      "ssh_username":       "{{ user `vbox_ssh_username` }}",
-      "ssh_password":       "{{ user `vbox_ssh_password` }}",
-
+      "boot_wait": "10s",
       "boot_command": [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "/install/vmlinuz<wait>",
@@ -195,8 +209,10 @@
         " -- <wait>",
         "<enter><wait>"
       ],
-      "shutdown_command": "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
-      "http_directory":     "http"
+
+      "shutdown_command":         "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+
+      "vm_name":                  "{{ user `instance_name` }}"
     }
   ],
   "provisioners": [
@@ -210,12 +226,15 @@
         "VBOX_VERSION={{ user `vbox_version` }}"
       ],
       "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "only": ["virtualbox-iso", "hyperv-iso"]
+      "only": ["virtualbox-iso"]
     },
     {
       "type":   "shell",
       "scripts": [
-        "scripts/serverspec/create-serverspec-temp-dirs.sh"
+        "scripts/serverspec/create-serverspec-temp-dirs.sh",
+        "scripts/mongodb/create-mongodb-temp-dirs.sh",
+        "scripts/nodejs/create-nodejs-temp-dirs.sh",
+        "scripts/nginx/create-nginx-temp-dirs.sh"
       ]
     },
     {
@@ -224,36 +243,56 @@
       "destination":  "/tmp/serverspec/"
     },
     {
+      "type":         "file",
+      "source":       "resources/mongodb/configs/",
+      "destination":  "/tmp/mongodb/configs/"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/mongodb/tests/",
+      "destination":  "/tmp/mongodb/tests/"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/nginx/configs/",
+      "destination":  "/tmp/nginx/configs/"
+    },
+    {
+      "type":         "file",
+      "source":       "resources/nginx/tests/",
+      "destination":  "/tmp/nginx/tests/"
+    },
+    {
       "type": "shell",
       "scripts": [
         "scripts/os-update-ubuntu.sh",
         "scripts/serverspec/serverspec-core-ubuntu.sh"
       ],
-      "only": ["virtualbox-iso", "hyperv-iso"]
+      "only": ["virtualbox-iso"]
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/java/java-jdk-ubuntu.sh",
-        "scripts/graphviz/graphviz-ubuntu.sh",
-        "scripts/git/git-ubuntu.sh",
-        "scripts/pip/pip-ubuntu.sh",
-        "scripts/awscli/awscli.sh",
-        "scripts/openstackcli/openstackcli.sh",
-        "scripts/docker/docker-ubuntu.sh"
-      ],
-      "only": ["virtualbox-ovf", "amazon-ebs", "googlecompute"]
+        "scripts/mongodb/mongodb-ubuntu.sh"
+      ]
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/os-upgrade-ubuntu.sh"
-      ],
-      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso"]
+        "scripts/nodejs/nodejs-ubuntu.sh"
+      ]
     },
     {
       "type": "shell",
       "scripts": [
+        "scripts/nginx/nginx-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/serverspec/serverspec-mongodb.sh",
+        "scripts/serverspec/serverspec-nginx.sh",
         "scripts/serverspec/serverspec-launch-test.sh"
       ]
     }
@@ -262,13 +301,20 @@
     {
       "type":   "compress",
       "output": "builds/{{user `image_output_name`}}/{{user `image_output_name`}}.tar.gz",
-      "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso"]
+      "only":   ["virtualbox-iso", "virtualbox-ovf"]
     },
     [
       {
         "type":   "vagrant",
         "output": "builds/{{user `image_output_name`}}/{{ user `image_output_name` }}.box",
-        "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso"]
+        "only":   ["virtualbox-iso", "virtualbox-ovf"]
+      },
+      {
+        "type":         "vagrant-cloud",
+        "box_tag":      "marcomaccio/{{ user `image_name` }}",
+        "access_token": "{{user `atlas_token`}}",
+        "version":      "{{user `image_output_version`}}",
+        "only":         ["virtualbox-iso"]
       }
     ]
   ]

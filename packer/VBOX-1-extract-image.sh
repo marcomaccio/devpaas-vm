@@ -2,13 +2,13 @@
 
 ########################################################################
 #
-# title:          Deploy an image for MM DevPaas HeadEnd Component
+# title:          Extract a Packer image from a tar.gz file created by packer
 # author:         Marco Maccio (http://www.marmac.name)
-# url:            http://github.com/marcomaccio/devpaas
-# description:    Deploy DEVPAAS server as Virtual Box VM
+# url:            http://github.com/marcomaccio/devpaas-vm
+# description:    Extract a Packer image from a tar.gz into a given directory
 #
 # to run:
-#                   sh deploy-devpaas-ubuntu-image.sh       \
+#                   sh VBOX-1-deploy-image-in-vbox.sh       \
 #                           deployments                     \
 #                           image_name                      \
 #                           image_version
@@ -45,31 +45,12 @@ ls -al $DEPLOYMENT_DIR/
 echo "****** ls -al $DEPLOYMENT_DIR/$IMAGE_NAME"
 ls -al $DEPLOYMENT_DIR/$IMAGE_NAME
 
+echo "****** Extract the tar.gz in $DEPLOYMENT_DIR/$IMAGE_NAME dir ******"
 tar -xvf $DEPLOYMENT_DIR/${IMAGE_NAME}.tar.gz -C $DEPLOYMENT_DIR/$IMAGE_NAME
 
-echo "****** Import $DEPLOYMENT_DIR/$IMAGE_NAME/$IMAGE_NAME-$IMAGE_VERSION.ovf file in Virtual Box ******"
-ls -al $DEPLOYMENT_DIR/$IMAGE_NAME/
-vboxmanage import $DEPLOYMENT_DIR/$IMAGE_NAME/$IMAGE_NAME-$IMAGE_VERSION.ovf
+echo "****** Delete tar.gz of deployed image ******"
+rm -f $DEPLOYMENT_DIR/${IMAGE_NAME}.tar.gz
 
-echo "****** List all the VM in Virtual Box ******"
-vboxmanage list vms
-
-echo "****** Start the VM in Virtual Box ******"
-vboxmanage startvm --type gui $IMAGE_NAME-$IMAGE_VERSION
-
-echo "****** List all running VMs in Virtual Box ******"
-vboxmanage list runningvms
-
-echo "******************************************************************************"
-echo "******************************************************************************"
-echo "****** Show VM info for: $IMAGE_NAME-$IMAGE_VERSION in Virtual Box ******"
-vboxmanage showvminfo $IMAGE_NAME-$IMAGE_VERSION
-echo "******************************************************************************"
-echo "******************************************************************************"
-
-echo "**************************************************************************"
-echo "TO POWER OFF: vboxmanage controlvm ${IMAGE_NAME}-${IMAGE_VERSION} poweroff"
-echo "**************************************************************************"
 
 duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."

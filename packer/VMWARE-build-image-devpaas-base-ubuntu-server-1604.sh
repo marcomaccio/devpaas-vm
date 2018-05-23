@@ -2,13 +2,13 @@
 
 ################################################################################################
 #
-# title:          Build NodeJS Webserver Image based on Ubuntu 16.04
+# title:          Build NodeJS Image based on Ubuntu 16.04
 # author:         Marco Maccio (http://marmac.name)
 # url:            https://github.com/marcomaccio/devpaas-vm
 # description:    Create image for NodeJS WebServer Image server based on Ubuntu 16.04 ISO image
 #
 # to run:
-#           sh VBOX-build-image-devpaas-webserver-ubuntu-server-1604.sh virtualbox-iso           \
+#           sh VMWARE-build-image-devpaas-base-ubuntu-server-1604.sh virtualbox-iso           \
 #                                                               -debug                      \
 #                                                               IMAGE_ISO_URL               \
 #                                                               ATLAS_USERNAME              \
@@ -24,7 +24,7 @@
 SECONDS=0
 echo " Start: " `date`
 
-export PACKER_LOGS_FILENAME="VBOX-packer-webserver-ubuntu-server-1604.log"
+export PACKER_LOGS_FILENAME="VMWARE-packer-base-ubuntu-server-1604.log"
 
 mkdir -p builds/packer_logs
 echo "Verify if already exist the packer log file"
@@ -65,7 +65,7 @@ export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "$INSTANCE_NAME"
 
 echo "Preparing build for $PACKER_PROVIDERS_LIST ..."
-export PACKER_TEMPLATE=templates/webserver/packer-webserver-ubuntu-server-1604.json
+export PACKER_TEMPLATE=templates/packer-devpaas-base-ubuntu-server-1604.json
 
 echo "Build the preseed file from the template ..."
 

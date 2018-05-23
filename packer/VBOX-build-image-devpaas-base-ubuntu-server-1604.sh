@@ -4,7 +4,7 @@
 #
 # title:          Build Base Image based on Ubuntu 16.04
 # author:         Marco Maccio (http://marmac.name)
-# url:            https://github.com/marcomaccio/devpaas
+# url:            https://github.com/marcomaccio/devpaas-vm
 # description:    Create image for Base Image server based on Ubuntu 16.04 ISO image
 #
 # to run:
@@ -58,8 +58,8 @@ export PRESEED_FILENAME=${14}           # ex. preseed-base-ubuntu-server-1604.cf
 
 export INSTANCE_DOMAIN_NAME=${15}       # ex. vbox-net.local
 
-export ATLAS_USERNAME=$3
-export ATLAS_TOKEN=$4
+export ATLAS_USERNAME=${16}
+export ATLAS_TOKEN=${17}
 
 export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "$INSTANCE_NAME"
@@ -70,8 +70,6 @@ export PACKER_TEMPLATE=templates/packer-devpaas-base-ubuntu-server-1604.json
 echo "Build the preseed file from the template ..."
 
 sed "s/USER_FULL_NAME/${USER_F_N}/g; s/USER_USERNAME/${VBOX_SSH_USERNAME}/g; s/USER_PASSWORD/${VBOX_SSH_PASSWORD}/g" http/preseed-ubuntu-server-1604.template > http/$PRESEED_FILENAME
-
-
 
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
