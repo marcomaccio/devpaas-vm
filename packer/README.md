@@ -3,7 +3,8 @@
 
 ## Packer projects structure
 
-This part of the repo is organized in the following way:
+This part of the repo contains the packer templates and related scripts and configuration file to create VM images for different providers.
+It is organized based on the following directory structure:
 
 | Directory | Description |   Notes                 |
 |-----------|-------------|-------------------------|
