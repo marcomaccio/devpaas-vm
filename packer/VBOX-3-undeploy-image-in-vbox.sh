@@ -8,7 +8,7 @@
 # description:    Deploy DEVPAAS server as Virtual Box VM
 #
 # to run:
-#                   sh deploy-devpaas-ubuntu-image.sh       \
+#                   sh VBOX-3-undeploy-image-in-vbox.sh       \
 #                           image_name                      \
 #                           image_version
 #
