@@ -1,105 +1,157 @@
 # Creation VM with Packer
 
-## Prerequisites
-In order to use the scripts in this repo the following softwares should be installed:
-* Packer
-* VirtualBox
-* Vagrant
-* Terraform
 
-### Install Packer 
-Packer (Tool to build Automated Machine Images) can be found [here](https://www.packer.io)
+## Packer projects structure
 
-It can be installed via most used Packet Managers.
+This part of the repo contains the packer templates and related scripts and configuration file to create VM images for different providers.
+It is organized based on the following directory structure:
 
-#### Windows
-```bash
-choco install packer
-```
+| Directory | Description |   Notes                 |
+|-----------|-------------|-------------------------|
+| templates | in this directory there are all packer json template that drives the build of an image. every packer template is specialized for a given scope and it holds different providers |  |
+| scripts   | in this directory there are all the bash scripts that install a specific service. they are provided for different linux flavor that is specified in the script filename |  |
+| resources | in this directory there are all the config files, data and server spec files for each service that it will be installed via the packer template. the config files will be managed by the service installation scripts in the directory [scripts](./scripts).            |                         |
+| http      | in this directory there are preseed files needed to initialize the os when the *-iso provider is used            |                         |
+| packer_cache   |             |                         |
+| output-<provider>   |             |                         |
+| builds   |             |                         |
+| deployments   |             |                         |
 
-#### Mac OS X
-```bash
-brew install packer
-```
+### templates
+In this directory can be found all the packer templates. They are organized based on the scope that the template has and each scope has its own directory.
+The templates are based on specific version of an operative system as they could vary from release to release.
+See below for the various available templates.
+In the root directory are present the templates for the base image for a given os version. Usually it's convinient use this template to generate a first image from which derive all the various descendat images based on the same os version.
+All the templates indicate in their name the referenced os and version type.
 
-#### Linux - Debian / Ubuntu
-```bash
-wget https://releases.hashicorp.com/packer/<PACKER_VERSION>/packer_<PACKER_VERSION>_linux_amd64.zip
+### scripts
+The scripts directory contains the bash scripts to install a given service.
+The service could have different installation script based on different os and version (it's reported in its name)
+The script named create-<service>-temp-dirs.sh created temporary directory under the /tmp dir in order to move the configs, data and tests files from the resources directory.
+This is step is required to avoid permission issues as explained in the packer documentation.
 
-unzip packer_<PACKER_VERSION>_linux_amd64.zip -d packer
+### resources
+it contains the configs, data and serverspec tests files for each service that will be installed by the service bash scripts.
 
-sudo mv packer /usr/local/
-```
-
-### Install VirtualBox
-
-#### Windows
-```bash
-choco install virtualbox
-```
-
-#### Mac OS X
-```bash
-brew cask install virtualbox
-brew cask install virtualbox-extension-pack
-```
-
-#### Linux - Debian / Ubuntu
-```bash
-wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-
-sudo sh -c 'echo "deb http://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" >> /etc/apt/sources.list.d/virtualbox.list'
-
-sudo apt remove virtualbox virtualbox-5.1
-
-sudo apt update
-sudo apt-get -y install gcc make linux-headers-$(uname -r) dkms
-
-sudo apt update
-sudo apt-get install virtualbox-5.2
-```
-
-### Install Vagrant
-
-#### Windows
-```bash
-choco install vagrant
-```
-
-#### Mac OS X
-```bash
-brew cask install vagrant
-```
-
-#### Linux - Debian / Ubuntu
-```bash
-
-```
-
-### Install Terraform
-
-#### Windows
-```bash
-choco install terraform
-```
-
-#### Mac OS X
-```bash
-brew cask install terraform
-```
-
-#### Linux - Debian / Ubuntu
-```bash
-
-```
-
-
-## Project structure
-
-This repo is organized in the following way:
-
-
-## VMs Template availables
-
+### http
+it contains the preseed file useful to configure the os when the vm is generated starting from a os vanilla iso image.
+the preseed is customized by the launching script in order to inject the username and password of the superuser that will be used by packer to create the image and it will be available via http by packer itself.
  
+### packer_cache
+This directory will be created by packer to download the iso images of the os, extensions packs etc...
+
+### builds
+it's generated by the templates and it contains the built image when the packer process is finished. 
+it's organized by image name (output_image_name variable defined in the launching scripts and passed to the packer template)
+it contains the packer log for each template.
+Every images will have in its directory a tar.gz file that will contains the image definition by provider and the related vagrant box file. 
+
+### deployments
+it contains the extracted tar.gz vm definition and it will be used by the *-ovf, *-vmx, *-vmcx provider to create the derived vm 
+
+## Tests
+All vms are tested before finalize the image creation via [ServerSpec](https://serverspec.org/) framework.
+In most of the case the following points will be tested:
+* installed packages
+* running services
+* opened and replying service ports
+ 
+
+## VMs Template available
+
+The following packer templates are availables to be used to create VM
+
+| Template  | Template Filename  | Directory   |   Scope                 |  Launching Script        | Docs                    |
+|-----------|----------------|-------------|-------------------------|-------------------------|-------------------------|
+| Base Ubuntu 16.04 | packer-devpaas-base-ubuntu-server-1604.json | templates | Create a Base Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-base-ubuntu-server-1604.sh | [further details](#base-ubuntu-server-16.04)|
+| Node X Ubuntu 16.04 | packer-devpaas-node-ubuntu-server-1604.json | templates/nodejs | Create a Node X on Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-nodejs-ubuntu-server-1604.sh | [further details](#nodejs-ubuntu-server-16.04)| 
+ 
+### Base Ubuntu Server 16.04 [base-ubuntu-server-16.04]
+
+#### Scope
+it creates a Base Ubuntu Server based on Ubuntu server 16.04
+ 
+#### Providers:
+* amazon-ebs        ( prefix = AWS  )
+* google-compute    ( prefix = GCP  )
+* virtualbox-iso    ( prefix = VBOX )
+* virtualbox-ovf    ( prefix = VBOX )
+* hyperv-iso        ( prefix = HYPV )
+* vmware-iso        ( prefix = VMWARE )
+
+#### Description
+it installs the following services:
+* vagrant key
+* virtualbox additions (only virtualbox) 
+* os-updates  (only *-iso providers, so that it won't be necessary to do in the *-ovf, *-vmx, *-vmcx providers )
+* server-spec (only on aws, gcp and *-iso providers, so that it won't be necessary to do in the *-ovf, *-vmx, *-vmcx providers )
+* java jdk
+* git
+* graphviz
+* pip
+* aws-cli
+* openstack-cli
+* docker
+
+#### Launching Scripts
+All launching script are prepared in bash and they are in the root packer directory (= <PROJECT_DIR>/packer)
+
+| Provider       | Filename |
+|----------------|---------------------------------------------------------------------------------------------------------------|
+| amazon-ebs     | [AWS-build-image-devpaas-base-ubuntu-server-1604.sh](./AWS-build-image-devpaas-base-ubuntu-server-1604.sh)    |
+| googlecompute  | [--]()    |
+| virtualbox-iso | [VBOX-build-image-devpaas-base-ubuntu-server-1604.sh](./VBOX-build-image-devpaas-base-ubuntu-server-1604.sh)   |
+| virtualbox-ovf | [VBOX-build-image-devpaas-base-ubuntu-server-1604.sh](./VBOX-build-image-devpaas-base-ubuntu-server-1604.sh)   |
+| vmware-iso     | [VMWARE-build-image-devpaas-base-ubuntu-server-1604.sh](./VMWARE-build-image-devpaas-base-ubuntu-server-1604.sh) |
+| hyperv-iso     | [HYPV-build-image-devpaas-base-ubuntu-server-1604.sh](./HYPV-build-image-devpaas-base-ubuntu-server-1604.sh) |
+
+All launching script are provided with the list of variables that need to be passed in order to run it properly.
+Variables list and value depends on the provider.
+
+#### Tests
+Via ServerSpec framework are verified the following points:
+* installed packages:
+  * 
+* running services:
+  * 
+* port opened and replied:
+  *
+
+### Node X Ubuntu Server 16.04 [nodejs-ubuntu-server-16.04]
+
+#### Scope
+It creates a VM image with NodeJS (the version is given as paramter via the launch script), npm, yarn, angular cli
+
+#### Providers:
+* amazon-ebs        ( prefix = AWS  )
+* google-compute    ( prefix = GCP  )
+* virtualbox-iso    ( prefix = VBOX )
+* virtualbox-ovf    ( prefix = VBOX )
+* hyperv-iso        ( prefix = HYPV )
+* vmware-iso        ( prefix = VMWARE )
+
+#### Description
+it installs the following services:
+
+
+#### Launching Scripts
+All launching script are prepared in bash and they are in the root packer directory (= <PROJECT_DIR>/packer)
+
+| Provider       | Filename |
+|----------------|-----------------------------------------------------------------------------------------------------------------------|
+| amazon-ebs     | --       |
+| googlecompute  | --       |
+| virtualbox-iso | [VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh](./VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh)      |
+| virtualbox-ovf | [VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh](./VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh)      |
+| vmware-iso     | [VMWARE-build-image-devpaas-nodejs-ubuntu-server-1604.sh](./VMWARE-build-image-devpaas-nodejs-ubuntu-server-1604.sh)  |
+| hyperv-iso     |          |
+
+All launching script are provided with the list of variables that need to be passed in order to run it properly.
+Variables list and value depends on the provider.
+
+N.B. To create VM instances in VirtualBox, VMWare, Hyper-V is suggested to create first the base-ubuntu-server-16.04 via the related -iso provider and then use the related -ovf, -vmx, -vmcx.
+In this way the build time is shorter.
+
+#### Tests
+Tests are performed via [ServerSpec](https://serverspec.org/) framework that will verify the following points:
+* nodejs package installation

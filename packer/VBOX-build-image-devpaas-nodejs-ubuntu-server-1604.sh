@@ -5,20 +5,26 @@
 # title:          Build NodeJS Image based on Ubuntu 16.04
 # author:         Marco Maccio (http://marmac.name)
 # url:            https://github.com/marcomaccio/devpaas-vm
-# description:    Create image for NodeJS WebServer Image server based on Ubuntu 16.04 ISO image
+# description:    Create image for NodeJS Image server based on Ubuntu 16.04 ISO image
 #
 # to run:
 #           sh VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh virtualbox-iso           \
 #                                                               -debug                      \
 #                                                               IMAGE_ISO_URL               \
-#                                                               ATLAS_USERNAME              \
-#                                                               ATLAS_TOKEN                 \
-#                                                               VBOX_SSH_USERNAME           \
-#                                                               VBOX_SSH_PASSWORD           \
-#                                                               VBOX_IMAGE_VERSION          \
+#                                                               IMAGE_ISO_CHECKSUM          \
+#                                                               IMAGE_ISO_CHECKSUM_TYPE     \
+#                                                               IMAGE_OUTPUT_NAME           \
+#                                                               IMAGE_OUTPUT_VERSION        \
 #                                                               VBOX_VERSION                \
 #                                                               VBOX_GUEST_ADDITIONS_URL    \
-#                                                               VBOX_OVA_SOURCE_PATH
+#                                                               VBOX_SSH_USER_FULL_NAME     \
+#                                                               VBOX_SSH_USERNAME           \
+#                                                               VBOX_SSH_PASSWORD           \
+#                                                               VBOX_OVA_SOURCE_PATH        \
+#                                                               PRESEED_FILENAME            \
+#                                                               INSTANCE_VCPU               \
+#                                                               INSTANCE_MEMORY             \
+#                                                               INSTANCE_DOMAIN_NAME
 ################################################################################################
 
 SECONDS=0
@@ -37,31 +43,30 @@ fi
 export PACKER_LOG=1
 export PACKER_LOG_PATH="./builds/packer_logs/$PACKER_LOGS_FILENAME"
 
-export PACKER_PROVIDERS_LIST=$1         # ex. virtualbox-iso or virtualbox-ovf
+export PACKER_PROVIDERS_LIST=${1}       # ex. virtualbox-iso or virtualbox-ovf
 
-export DEBUG=$2                         # ex. -debug
+export DEBUG=${2}                       # ex. -debug
 
-export IMAGE_ISO_URL=$3                 # ex. http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-export IMAGE_ISO_CHECKSUM=$4            # ex. 0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2
-export IMAGE_ISO_CHECKSUM_TYPE=$5       # ex. sha256
-export IMAGE_OUTPUT_NAME=$6             # ex. mm-base-ubuntu-server-1604
-export IMAGE_OUTPUT_VERSION=$7          # ex. 0.0.1
+export IMAGE_ISO_URL=${3}               # ex. http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+export IMAGE_ISO_CHECKSUM=${4}          # ex. 0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2
+export IMAGE_ISO_CHECKSUM_TYPE=${5}     # ex. sha256
+export IMAGE_OUTPUT_NAME=${6}           # ex. base-ubuntu-server-1604
+export IMAGE_OUTPUT_VERSION=${7}        # ex. 0.0.1
 
-export VBOX_VERSION=$8                  # ex. 5.2.8
-export VBOX_GUEST_ADDITIONS_URL=$9      # ex. https://download.virtualbox.org/virtualbox/5.2.8/VBoxGuestAdditions_5.2.8.iso
-export VBOX_SSH_USERNAME=${10}          # ex. packer
-export VBOX_SSH_PASSWORD=${11}          # ex. packer
+export VBOX_VERSION=${8}                # ex. 5.2.8
+export VBOX_GUEST_ADDITIONS_URL=${9}    # ex. https://download.virtualbox.org/virtualbox/5.2.8/VBoxGuestAdditions_5.2.8.iso
+export VBOX_SSH_USER_FULL_NAME=${10}    # ex. Administrator
+export VBOX_SSH_USERNAME=${11}          # ex. packer
+export VBOX_SSH_PASSWORD=${12}          # ex. packer
 
-export VBOX_OVA_SOURCE_PATH=${12}       # ex. deployment/mm-base-ubuntu-1604-0.0.1/mm-base-ubuntu-1604-0.0.1.ovf
-export USER_F_N=${13}                   # ex. Administrator
+export VBOX_OVA_SOURCE_PATH=${13}       # ex. deployment/mm-base-ubuntu-1604-0.0.1/mm-base-ubuntu-1604-0.0.1.ovf
 export PRESEED_FILENAME=${14}           # ex. preseed-base-ubuntu-server-1604.cfg
 
-export INSTANCE_DOMAIN_NAME=${15}       # ex. vbox-net.local
+export INSTANCE_VCPU=${15}              # ex. 2
+export INSTANCE_MEMORY=${16}            # ex. 1024 = 1Gb
+export INSTANCE_DOMAIN_NAME=${17}       # ex. domain-name.local
 
-export NODE_VERSION=${16}               # ex. 8
-
-export ATLAS_USERNAME=${17}
-export ATLAS_TOKEN=${18}
+export NODE_VERSION=${18}               # ex. 8
 
 export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "$INSTANCE_NAME"
@@ -71,7 +76,10 @@ export PACKER_TEMPLATE=templates/nodejs/packer-nodejs-ubuntu-server-1604.json
 
 echo "Build the preseed file from the template ..."
 
-sed "s/USER_FULL_NAME/${USER_F_N}/g; s/USER_USERNAME/${VBOX_SSH_USERNAME}/g; s/USER_PASSWORD/${VBOX_SSH_PASSWORD}/g" http/preseed-ubuntu-server-1604.template > http/$PRESEED_FILENAME
+echo "Create the preseed ${PRESEED_FILENAME} file from the template ..."
+sed "s/HOST_NAME/${INSTANCE_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" http/preseed-ubuntu-server-1604.template > http/${PRESEED_FILENAME}
+
+sed "s/USER_FULL_NAME/${VBOX_SSH_USER_FULL_NAME}/g; s/USER_USERNAME/${VBOX_SSH_USERNAME}/g; s/USER_PASSWORD/${VBOX_SSH_PASSWORD}/g" http/preseed-ubuntu-server-1604.template > http/${PRESEED_FILENAME}
 
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
@@ -83,6 +91,8 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                      \
         -var "image_output_version=$IMAGE_OUTPUT_VERSION"           \
         -var "instance_name=$INSTANCE_NAME"                         \
         -var "instance_domain_name=$INSTANCE_DOMAIN_NAME"           \
+        -var "instance_vcpu=${INSTANCE_VCPU}"                       \
+        -var "instance_memory=${INSTANCE_MEMORY}"                   \
         -var "vbox_version=$VBOX_VERSION"                           \
         -var "vbox_guest_additions_url=$VBOX_GUEST_ADDITIONS_URL"   \
         -var "vbox_ssh_username=$VBOX_SSH_USERNAME"                 \
@@ -90,8 +100,6 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                      \
         -var "preseed_filename=$PRESEED_FILENAME"                   \
         -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"           \
         -var "node_version=$NODE_VERSION"                           \
-        -var "atlas_username=$ATLAS_USERNAME"                       \
-        -var "atlas_token=$ATLAS_TOKEN"                             \
         ${PACKER_TEMPLATE}
 
 packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
@@ -102,6 +110,8 @@ packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
         -var "image_output_version=$IMAGE_OUTPUT_VERSION"           \
         -var "instance_name=$INSTANCE_NAME"                         \
         -var "instance_domain_name=$INSTANCE_DOMAIN_NAME"           \
+        -var "instance_vcpu=${INSTANCE_VCPU}"                       \
+        -var "instance_memory=${INSTANCE_MEMORY}"                   \
         -var "vbox_version=$VBOX_VERSION"                           \
         -var "vbox_guest_additions_url=$VBOX_GUEST_ADDITIONS_URL"   \
         -var "vbox_ssh_username=$VBOX_SSH_USERNAME"                 \
@@ -109,8 +119,6 @@ packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
         -var "preseed_filename=$PRESEED_FILENAME"                   \
         -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"           \
         -var "node_version=$NODE_VERSION"                           \
-        -var "atlas_username=$ATLAS_USERNAME"                       \
-        -var "atlas_token=$ATLAS_TOKEN"                             \
         ${PACKER_TEMPLATE}
 
 duration=$SECONDS
