@@ -63,10 +63,10 @@ The following packer templates are availables to be used to create VM
 
 | Template  | Template Filename  | Directory   |   Scope                 |  Launching Script        | Docs                    |
 |-----------|----------------|-------------|-------------------------|-------------------------|-------------------------|
-| Base Ubuntu 16.04 | packer-devpaas-base-ubuntu-server-1604.json | templates | Create a Base Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-base-ubuntu-server-1604.sh | [further details](#base-ubuntu-server-16.04)|
-| Node X Ubuntu 16.04 | packer-devpaas-node-ubuntu-server-1604.json | templates/nodejs | Create a Node X on Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-nodejs-ubuntu-server-1604.sh | [further details](#nodejs-ubuntu-server-16.04)| 
+| Base Ubuntu 16.04 | packer-devpaas-base-ubuntu-server-1604.json | templates | Create a Base Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-base-ubuntu-server-1604.sh | [docs](#base-ubuntu-server-16-04)|
+| Node X Ubuntu 16.04 | packer-devpaas-node-ubuntu-server-1604.json | templates/nodejs | Create a Node X on Ubuntu Server 16.04 image |<PROVIDER>-build-image-devpaas-nodejs-ubuntu-server-1604.sh | [docs](#nodejs-ubuntu-server-16-04)| 
  
-### Base Ubuntu Server 16.04 [base-ubuntu-server-16.04]
+### Base Ubuntu Server 16 04
 
 #### Scope
 it creates a Base Ubuntu Server based on Ubuntu server 16.04
@@ -111,13 +111,13 @@ Variables list and value depends on the provider.
 #### Tests
 Via ServerSpec framework are verified the following points:
 * installed packages:
-  * 
+  * ...
 * running services:
-  * 
+  * ...
 * port opened and replied:
-  *
+  * ...
 
-### Node X Ubuntu Server 16.04 [nodejs-ubuntu-server-16.04]
+### Node X Ubuntu Server 16 04 
 
 #### Scope
 It creates a VM image with NodeJS (the version is given as paramter via the launch script), npm, yarn, angular cli
