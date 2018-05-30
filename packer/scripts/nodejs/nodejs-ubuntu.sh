@@ -23,7 +23,7 @@ npm cache verify
 sudo npm install -g pm2
 
 echo "***** installation of NodeJS ${NODE_VERSION} & NPM  Ended *****"
-echo "***************************************"
+echo "***************************************************************"
 
 # Then it should get the dist of the NODE HE app
 # launch it with pm2 start server.js
