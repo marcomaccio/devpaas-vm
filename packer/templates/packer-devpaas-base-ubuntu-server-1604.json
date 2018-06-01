@@ -331,7 +331,8 @@
       "scripts": [
         "scripts/os-upgrade-ubuntu.sh"
       ],
-      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
+      "expect_disconnect": true
     },
     {
       "type": "shell",
