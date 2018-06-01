@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VBOX - EXTRACT - NODE Ubuntu Server 16.04" type="BashConfigurationType" factoryName="Bash" folderName="VBOX">
+    <module name="devpaas" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="INTERPRETER_PATH" value="$INTERPRETER_PATH$" />
+    <option name="WORKING_DIRECTORY" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/packer/VBOX-1-extract-image.sh" />
+    <option name="PARAMETERS" value="deployments node-ubuntu-server-1604 0.0.1" />
+    <method />
+  </configuration>
+</component>

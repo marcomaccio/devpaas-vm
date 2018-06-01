@@ -39,6 +39,7 @@
     "vbox_ssh_user_fullname":   "",
     "vbox_ssh_username":        "",
     "vbox_ssh_password":        "",
+    "vbox_shared_folder_root_path":  "",
 
     "preseed_filename":         "",
     "node_version":             ""
@@ -165,7 +166,8 @@
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ]
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_root_path` }}/{{ user `image_output_name` }}/data", "--automount"]
       ]
     },
     {
