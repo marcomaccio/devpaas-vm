@@ -1,0 +1,364 @@
+{
+  "variables": {
+
+    "home":                     "{{env `HOME`}}",
+
+    "image_iso_url":            "",
+    "image_iso_checksum":       "",
+    "image_iso_checksum_type":  "",
+
+    "image_output_name":        "",
+    "image_output_description": "",
+    "image_output_version":     "",
+
+    "instance_name":            "",
+    "instance_domain_name":     "",
+    "instance_vcpu":            "",
+    "instance_memory":          "",
+
+    "aws_ssh_username":         "",
+    "aws_ssh_keypair_name":     "",
+    "aws_ssh_private_key_file": "",
+
+    "aws_region":               "",
+    "aws_vpc_id":               "",
+    "aws_subnet_id":            "",
+    "aws_source_image":         "",
+    "aws_instance_type":        "",
+    "aws_security_groups":      "",
+
+    "gcp_account_file":         "",
+    "gcp_project_id":           "",
+    "gcp_project_name":         "",
+    "gcp_zone":                 "",
+    "gcp_ssh_username":         "",
+    "gcp_source_image":         "",
+
+    "vbox_version":             "",
+    "vbox_guest_additions_url": "",
+    "vbox_ssh_user_fullname":   "",
+    "vbox_ssh_username":        "",
+    "vbox_ssh_password":        "",
+    "vbox_shared_folder_root_path":  "",
+
+    "preseed_filename":         ""
+  },
+  "builders": [
+    {
+      "type":                     "amazon-ebs",
+
+      "ami_virtualization_type":  "hvm",
+      "ami_name":                 "{{ user `image_output_name`         }}",
+      "ami_description":          "{{ user `image_output_description`  }} AMI",
+
+      "ssh_pty":                  "true",
+      "ssh_username":             "{{ user `aws_ssh_username`         }}",
+      "ssh_keypair_name":         "{{ user `aws_ssh_keypair_name`     }}",
+      "ssh_private_key_file":     "{{ user `aws_ssh_private_key_file` }}",
+
+      "region":                   "{{ user `aws_region` }}",
+      "vpc_id":                   "{{ user `aws_vpc_id` }}",
+      "subnet_id":                "{{ user `aws_subnet_id` }}",
+      "source_ami":               "{{ user `aws_source_image` }}",
+      "instance_type":            "{{ user `aws_instance_type` }}",
+      "security_group_id":        "{{ user `aws_security_groups` }}",
+
+      "run_tags":         { "ami-create": "{{ user `image_output_name`}}" },
+      "tags":             { "ami": "{{ user `image_output_name`}}"},
+
+      "associate_public_ip_address": true
+
+    },
+    {
+      "type":                     "googlecompute",
+
+      "image_name":               "{{ user `image_output_name` }}",
+      "image_description":        "{{ user `image_output_description` }}",
+
+      "account_file":             "{{ user `gcp_account_file` }}",
+      "project_id":               "{{ user `gcp_project_id` }}",
+
+      "zone":                     "{{ user `gcp_zone` }}",
+      "source_image":             "{{ user `gcp_source_image` }}",
+      "instance_name":            "{{ user `instance_name` }}",
+
+      "ssh_username":             "{{ user `gcp_ssh_username` }}",
+
+      "communicator":             "ssh"
+    },
+    {
+      "type":               "virtualbox-ovf",
+      "source_path":        "{{ user `vbox_ova_source_path` }}",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+
+      "export_opts": [
+        "--vsys", "0", "--manifest", "--description", "{{user `image_output_description`}}", "--version", "{{user `image_output_version`}}", "--ovf20"
+      ],
+      "format":             "ovf",
+
+      "headless":           true,
+
+      "shutdown_command":   "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+
+      "vm_name":            "{{ user `instance_name` }}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ]
+      ]
+    },
+    {
+      "type":               "virtualbox-iso",
+      "guest_os_type":      "Ubuntu_64",
+
+      "export_opts": [
+        "--vsys", "0", "--manifest", "--description", "{{user `image_output_description`}}", "--version", "{{user `image_output_version`}}", "--ovf20"
+      ],
+      "format":             "ovf",
+
+      "headless":           true,
+      "http_directory":     "http",
+
+      "disk_size":          81920,
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+      "ssh_pty" :           true,
+
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
+
+      "boot_wait": "10s",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+
+      "shutdown_command":         "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+      "virtualbox_version_file":  ".vbox_version",
+      "guest_additions_mode":     "upload",
+      "guest_additions_url":      "{{ user `vbox_guest_additions_url` }}",
+      "guest_additions_path":     "VBoxGuestAdditions_{{ user `vbox_version` }}.iso",
+      "vm_name":                  "{{ user `instance_name` }}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_root_path` }}/{{ user `image_output_name` }}/data", "--automount"]
+      ]
+    },
+    {
+      "type":               "hyperv-iso",
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "shutdown_command": "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+      "http_directory":     "http"
+    },
+    {
+      "type":               "vmware-iso",
+      "guest_os_type":      "ubuntu-64",
+
+      "format":             "ovf",
+
+      "headless":           false,
+      "http_directory":     "http",
+
+      "disk_size":          81920,
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+      "ssh_pty" :           true,
+
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
+
+      "disable_vnc":          false,
+      "vnc_disable_password": true,
+      "vnc_port_min":         "5900",
+      "vnc_port_max":         "5911",
+      "vnc_bind_address":     "0.0.0.0",
+
+      "boot_wait": "10s",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+
+      "shutdown_command":         "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+
+      "version":                  "9",
+      "tools_upload_flavor":      "windows",
+      "tools_upload_path":        "/var/tmp/{{.Flavor}}.iso",
+
+      "vm_name":                  "{{ user `instance_name` }}",
+
+      "vmx_data": {
+        "cpuid.coresPerSocket":   "1",
+        "numvcpus":               "{{ user `instance_vcpu`   }}",
+        "memsize":                "{{ user `instance_memory` }}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/virtualbox/virtualbox-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "VBOX_VERSION={{ user `vbox_version` }}"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/vagrant/vagrant.sh"
+      ],
+      "environment_vars": [
+        "VBOX_VERSION={{ user `vbox_version` }}"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso", "hyperv-iso", "vmware-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-update-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "hyperv-iso", "vmware-iso"]
+    },
+    {
+      "type":   "shell",
+      "scripts": [
+        "scripts/serverspec/create-serverspec-temp-dirs.sh"
+      ]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/serverspec/configs/",
+      "destination":  "/tmp/serverspec/"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/serverspec/serverspec-core-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/java/java-jdk-ubuntu.sh",
+        "scripts/graphviz/graphviz-ubuntu.sh",
+        "scripts/git/git-ubuntu.sh",
+        "scripts/pip/pip-ubuntu.sh",
+        "scripts/awscli/awscli.sh",
+        "scripts/openstackcli/openstackcli.sh",
+        "scripts/docker/docker-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "amazon-ebs", "googlecompute"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-upgrade-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-desktop-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/serverspec/serverspec-launch-test.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type":   "compress",
+      "output": "builds/{{user `image_output_name`}}/{{user `image_output_name`}}.tar.gz",
+      "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
+    },
+    [
+      {
+        "type":   "vagrant",
+        "output": "builds/{{user `image_output_name`}}/{{.Provider}}-{{ user `image_output_name` }}.box",
+        "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
+      }
+    ]
+  ]
+}
