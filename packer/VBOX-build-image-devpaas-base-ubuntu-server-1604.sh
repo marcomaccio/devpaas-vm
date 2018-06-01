@@ -43,28 +43,29 @@ fi
 export PACKER_LOG=1
 export PACKER_LOG_PATH="./builds/packer_logs/$PACKER_LOGS_FILENAME"
 
-export PACKER_PROVIDERS_LIST=${1}       # ex. virtualbox-iso or virtualbox-ovf
+export PACKER_PROVIDERS_LIST=${1}           # ex. virtualbox-iso or virtualbox-ovf
 
-export DEBUG=${2}                       # ex. -debug
+export DEBUG=${2}                           # ex. -debug
 
-export IMAGE_ISO_URL=${3}               # ex. http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-export IMAGE_ISO_CHECKSUM=${4}          # ex. 0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2
-export IMAGE_ISO_CHECKSUM_TYPE=${5}     # ex. sha256
-export IMAGE_OUTPUT_NAME=${6}           # ex. base-ubuntu-server-1604
-export IMAGE_OUTPUT_VERSION=${7}        # ex. 0.0.1
+export IMAGE_ISO_URL=${3}                   # ex. http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+export IMAGE_ISO_CHECKSUM=${4}              # ex. 0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2
+export IMAGE_ISO_CHECKSUM_TYPE=${5}         # ex. sha256
+export IMAGE_OUTPUT_NAME=${6}               # ex. base-ubuntu-server-1604
+export IMAGE_OUTPUT_VERSION=${7}            # ex. 0.0.1
 
-export VBOX_VERSION=${8}                # ex. 5.2.8
-export VBOX_GUEST_ADDITIONS_URL=${9}    # ex. https://download.virtualbox.org/virtualbox/5.2.8/VBoxGuestAdditions_5.2.8.iso
-export VBOX_SSH_USER_FULL_NAME=${10}    # ex. Administrator
-export VBOX_SSH_USERNAME=${11}          # ex. packer
-export VBOX_SSH_PASSWORD=${12}          # ex. packer
+export VBOX_VERSION=${8}                    # ex. 5.2.8
+export VBOX_GUEST_ADDITIONS_URL=${9}        # ex. https://download.virtualbox.org/virtualbox/5.2.8/VBoxGuestAdditions_5.2.8.iso
+export VBOX_SSH_USER_FULL_NAME=${10}        # ex. Administrator
+export VBOX_SSH_USERNAME=${11}              # ex. packer
+export VBOX_SSH_PASSWORD=${12}              # ex. packer
+export VBOX_SHARED_FOLDER_ROOT_PATH=${13}   # ex. /c/development
+export VBOX_OVA_SOURCE_PATH=${14}           # ex. deployment/mm-base-ubuntu-1604-0.0.1/mm-base-ubuntu-1604-0.0.1.ovf
 
-export VBOX_OVA_SOURCE_PATH=${13}       # ex. deployment/mm-base-ubuntu-1604-0.0.1/mm-base-ubuntu-1604-0.0.1.ovf
-export PRESEED_FILENAME=${14}           # ex. preseed-base-ubuntu-server-1604.cfg
+export PRESEED_FILENAME=${15}               # ex. preseed-base-ubuntu-server-1604.cfg
 
-export INSTANCE_VCPU=${15}              # ex. 2
-export INSTANCE_MEMORY=${16}            # ex. 1024 = 1Gb
-export INSTANCE_DOMAIN_NAME=${17}       # ex. domain-name.local
+export INSTANCE_VCPU=${16}                  # ex. 2
+export INSTANCE_MEMORY=${17}                # ex. 1024 = 1Gb
+export INSTANCE_DOMAIN_NAME=${18}           # ex. domain-name.local
 
 export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "$INSTANCE_NAME"
@@ -81,22 +82,23 @@ sed "s/USER_FULL_NAME/${VBOX_SSH_USER_FULL_NAME}/g; s/USER_USERNAME/${VBOX_SSH_U
 
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
-packer validate -only=${PACKER_PROVIDERS_LIST}                      \
-        -var "image_iso_url=$IMAGE_ISO_URL"                         \
-        -var "image_iso_checksum=$IMAGE_ISO_CHECKSUM"               \
-        -var "image_iso_checksum_type=$IMAGE_ISO_CHECKSUM_TYPE"     \
-        -var "image_output_name=$IMAGE_OUTPUT_NAME"                 \
-        -var "image_output_version=$IMAGE_OUTPUT_VERSION"           \
-        -var "instance_name=$INSTANCE_NAME"                         \
-        -var "instance_domain_name=$INSTANCE_DOMAIN_NAME"           \
-        -var "instance_vcpu=${INSTANCE_VCPU}"                       \
-        -var "instance_memory=${INSTANCE_MEMORY}"                   \
-        -var "vbox_version=$VBOX_VERSION"                           \
-        -var "vbox_guest_additions_url=$VBOX_GUEST_ADDITIONS_URL"   \
-        -var "vbox_ssh_username=$VBOX_SSH_USERNAME"                 \
-        -var "vbox_ssh_password=$VBOX_SSH_PASSWORD"                 \
-        -var "preseed_filename=$PRESEED_FILENAME"                   \
-        -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"           \
+packer validate -only=${PACKER_PROVIDERS_LIST}                              \
+        -var "image_iso_url=$IMAGE_ISO_URL"                                 \
+        -var "image_iso_checksum=$IMAGE_ISO_CHECKSUM"                       \
+        -var "image_iso_checksum_type=$IMAGE_ISO_CHECKSUM_TYPE"             \
+        -var "image_output_name=$IMAGE_OUTPUT_NAME"                         \
+        -var "image_output_version=$IMAGE_OUTPUT_VERSION"                   \
+        -var "instance_name=$INSTANCE_NAME"                                 \
+        -var "instance_domain_name=$INSTANCE_DOMAIN_NAME"                   \
+        -var "instance_vcpu=${INSTANCE_VCPU}"                               \
+        -var "instance_memory=${INSTANCE_MEMORY}"                           \
+        -var "vbox_version=$VBOX_VERSION"                                   \
+        -var "vbox_guest_additions_url=$VBOX_GUEST_ADDITIONS_URL"           \
+        -var "vbox_ssh_username=$VBOX_SSH_USERNAME"                         \
+        -var "vbox_ssh_password=$VBOX_SSH_PASSWORD"                         \
+        -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"                   \
+        -var "vbox_shared_folder_root_path=${VBOX_SHARED_FOLDER_ROOT_PATH}" \
+        -var "preseed_filename=$PRESEED_FILENAME"                           \
         ${PACKER_TEMPLATE}
 
 packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
@@ -113,8 +115,9 @@ packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
         -var "vbox_guest_additions_url=$VBOX_GUEST_ADDITIONS_URL"   \
         -var "vbox_ssh_username=$VBOX_SSH_USERNAME"                 \
         -var "vbox_ssh_password=$VBOX_SSH_PASSWORD"                 \
-        -var "preseed_filename=$PRESEED_FILENAME"                   \
         -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"           \
+        -var "vbox_shared_folder_root_path=${VBOX_SHARED_FOLDER_ROOT_PATH}" \
+        -var "preseed_filename=$PRESEED_FILENAME"                   \
         ${PACKER_TEMPLATE}
 
 duration=$SECONDS
