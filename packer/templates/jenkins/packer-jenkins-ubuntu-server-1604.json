@@ -1,7 +1,5 @@
 {
   "variables": {
-    "atlas_username":           "",
-    "atlas_token":              "",
 
     "home":                     "{{env `HOME`}}",
 
@@ -9,12 +7,14 @@
     "image_iso_checksum":       "",
     "image_iso_checksum_type":  "",
 
-    "image_output_name":        "mm-jenkins-ubuntu-server-1604",
-    "image_output_description": "MM Jenkins Ubuntu Server 16.04 VM Image",
+    "image_output_name":        "",
+    "image_output_description": "",
     "image_output_version":     "",
 
-    "instance_name":            "mm-jenkins-ubuntu-server-1604",
+    "instance_name":            "",
     "instance_domain_name":     "",
+    "instance_vcpu":            "",
+    "instance_memory":          "",
 
     "aws_ssh_username":         "",
     "aws_ssh_keypair_name":     "",
@@ -39,6 +39,7 @@
     "vbox_ssh_user_fullname":   "",
     "vbox_ssh_username":        "",
     "vbox_ssh_password":        "",
+    "vbox_shared_folder_root_path":  "",
 
     "preseed_filename":         ""
   },
@@ -103,15 +104,14 @@
 
       "vm_name":            "{{ user `instance_name` }}",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", "3072" ],
-        [ "modifyvm", "{{.Name}}", "--cpus"  ,    "2" ],
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ],
         [ "modifyvm", "{{.Name}}", "--natpf1",   "jenkins  ,tcp,,8090,,8080" ]
       ]
     },
     {
-      "type": "virtualbox-iso",
+      "type":               "virtualbox-iso",
       "guest_os_type":      "Ubuntu_64",
 
       "export_opts": [
@@ -163,11 +163,12 @@
       "guest_additions_path":     "VBoxGuestAdditions_{{ user `vbox_version` }}.iso",
       "vm_name":                  "{{ user `instance_name` }}",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", "3072" ],
-        [ "modifyvm", "{{.Name}}", "--cpus"  ,    "2" ],
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "jenkins  ,tcp,,8090,,8080" ]
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2225,,  22" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1",   "jenkins  ,tcp,,8090,,8080" ],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_root_path` }}/{{ user `image_output_name` }}/data", "--automount"]
       ]
     },
     {
@@ -208,13 +209,30 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/virtualbox/virtualbox-ubuntu.sh",
+        "scripts/virtualbox/virtualbox-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "VBOX_VERSION={{ user `vbox_version` }}"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
         "scripts/vagrant/vagrant.sh"
       ],
       "environment_vars": [
         "VBOX_VERSION={{ user `vbox_version` }}"
       ],
       "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso", "hyperv-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-update-ubuntu.sh"
+      ],
       "only": ["virtualbox-iso", "hyperv-iso"]
     },
     {
@@ -247,7 +265,6 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/os-update-ubuntu.sh",
         "scripts/serverspec/serverspec-core-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "hyperv-iso"]
@@ -260,9 +277,10 @@
         "scripts/git/git-ubuntu.sh",
         "scripts/pip/pip-ubuntu.sh",
         "scripts/awscli/awscli.sh",
-        "scripts/openstackcli/openstackcli.sh"
+        "scripts/openstackcli/openstackcli.sh",
+        "scripts/docker/docker-ubuntu.sh"
       ],
-      "only": ["virtualbox-iso", "hyperv-iso"]
+      "only": ["virtualbox-iso", "amazon-ebs", "googlecompute"]
     },
     {
       "type": "shell",
@@ -272,7 +290,6 @@
       "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso"],
       "expect_disconnect": true
     },
-
     {
       "type": "shell",
       "scripts": [
@@ -296,15 +313,8 @@
     [
       {
         "type":   "vagrant",
-        "output": "builds/{{user `image_output_name`}}/{{ user `image_output_name` }}.box",
+        "output": "builds/{{user `image_output_name`}}/{{.Provider}}-{{ user `image_output_name` }}.box",
         "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso"]
-      },
-      {
-        "type":         "vagrant-cloud",
-        "box_tag":      "marcomaccio/{{ user `image_name` }}",
-        "access_token": "{{user `atlas_token`}}",
-        "version":      "{{user `image_output_version`}}",
-        "only":         ["virtualbox-iso", "hyperv-iso"]
       }
     ]
   ]
