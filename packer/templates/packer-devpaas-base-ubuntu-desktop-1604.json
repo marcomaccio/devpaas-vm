@@ -41,8 +41,7 @@
     "vbox_ssh_password":        "",
     "vbox_shared_folder_root_path":  "",
 
-    "preseed_filename":         "",
-    "node_version":             ""
+    "preseed_filename":         ""
   },
   "builders": [
     {
@@ -300,8 +299,7 @@
     {
       "type":   "shell",
       "scripts": [
-        "scripts/serverspec/create-serverspec-temp-dirs.sh",
-        "scripts/nodejs/create-nodejs-temp-dirs.sh"
+        "scripts/serverspec/create-serverspec-temp-dirs.sh"
       ]
     },
     {
@@ -318,23 +316,29 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/nodejs/nodejs-ubuntu.sh"
+        "scripts/java/java-jdk-ubuntu.sh",
+        "scripts/graphviz/graphviz-ubuntu.sh",
+        "scripts/git/git-ubuntu.sh",
+        "scripts/pip/pip-ubuntu.sh",
+        "scripts/awscli/awscli.sh",
+        "scripts/openstackcli/openstackcli.sh",
+        "scripts/docker/docker-ubuntu.sh"
       ],
-      "environment_vars": [
-        "NODE_VERSION={{ user `node_version` }}"
-      ]
+      "only": ["virtualbox-iso", "amazon-ebs", "googlecompute"]
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/yarn/yarn-ubuntu.sh"
-      ]
+        "scripts/os-upgrade-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/angular/angular-ubuntu.sh"
-      ]
+        "scripts/os-desktop-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
     },
     {
       "type": "shell",

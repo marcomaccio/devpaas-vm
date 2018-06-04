@@ -71,7 +71,7 @@ export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "$INSTANCE_NAME"
 
 echo "Preparing build for $PACKER_PROVIDERS_LIST ..."
-export PACKER_TEMPLATE=templates/packer-devpaas-base-ubuntu-server-1604.json
+export PACKER_TEMPLATE=templates/packer-devpaas-base-ubuntu-desktop-1604.json
 
 echo "Build the preseed file from the template ..."
 

@@ -1,15 +1,10 @@
 #!/bin/bash -e
+
 echo "***** JENKINS installation"
 wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
-sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
 sudo apt-get -y update
 sudo apt-get install -y jenkins
-
-echo '****** Installing in Jenkins aws-cloudwatch-library Plugins'
-cd /var/lib/jenkins/plugins
-sudo wget https://github.com/javamelody/aws-cloudwatch-library/releases/download/1.11.136/aws-cloudwatch-library.hpi
-cd /var/lib/jenkins
-sudo chown -R jenkins:jenkins /var/lib/jenkins/plugins
 
 echo '****** Installing Jenkins Plugins'
 cd /tmp/jenkins/scripts

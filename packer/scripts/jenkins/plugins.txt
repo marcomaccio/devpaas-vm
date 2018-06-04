@@ -9,9 +9,6 @@ credentials
 credentials-binding
 ssh-credentials
 oauth-credentials
-google-oauth-plugin
-aws-credentials
-aws-bucket-credentials
 email-ext
 mailer
 port-allocator
@@ -45,7 +42,6 @@ mercurial
 multiple-scms
 subversion
 nant
-google-metadata-plugin
 mask-passwords
 icon-shim
 javadoc
@@ -82,12 +78,14 @@ jobConfigHistory
 envinject
 environment-script
 warnings
+google-oauth-plugin
 google-source-plugin
-gcloud-sdk
+google-metadata-plugin
 google-deployment-manager
 google-play-android-publisher
 google-analytics-usage-reporter
 google-storage-plugin
+gcloud-sdk
 gcal
 gcm-notification
 logstash
@@ -145,6 +143,8 @@ blueocean-pipeline-scm-api
 android-signing
 android-emulator
 android-lint
+aws-credentials
+aws-bucket-credentials
 aws-java-sdk
 aws-device-farm
 aws-lambda
