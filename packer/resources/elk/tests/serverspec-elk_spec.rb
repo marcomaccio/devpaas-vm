@@ -23,6 +23,3 @@ end
 describe package('logstash'), :if => os[:family] == 'ubuntu' do
   it { should be_installed }
 end
-
-
-
