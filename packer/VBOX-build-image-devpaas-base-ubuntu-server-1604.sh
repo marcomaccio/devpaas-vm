@@ -101,7 +101,7 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                              \
         -var "preseed_filename=$PRESEED_FILENAME"                           \
         ${PACKER_TEMPLATE}
 
-packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
+packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
         -var "image_iso_url=$IMAGE_ISO_URL"                         \
         -var "image_iso_checksum=$IMAGE_ISO_CHECKSUM"               \
         -var "image_iso_checksum_type=$IMAGE_ISO_CHECKSUM_TYPE"     \
