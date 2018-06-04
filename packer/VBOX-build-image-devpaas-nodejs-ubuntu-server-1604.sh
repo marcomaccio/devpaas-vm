@@ -100,6 +100,7 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                              \
         -var "vbox_ssh_password=$VBOX_SSH_PASSWORD"                         \
         -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"                   \
         -var "vbox_shared_folder_root_path=${VBOX_SHARED_FOLDER_ROOT_PATH}" \
+        -var "preseed_filename=$PRESEED_FILENAME"                           \
         -var "node_version=$NODE_VERSION"                           \
         ${PACKER_TEMPLATE}
 
@@ -119,6 +120,7 @@ packer build -force -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}        \
         -var "vbox_ssh_password=$VBOX_SSH_PASSWORD"                 \
         -var "vbox_ova_source_path=$VBOX_OVA_SOURCE_PATH"           \
         -var "vbox_shared_folder_root_path=${VBOX_SHARED_FOLDER_ROOT_PATH}" \
+        -var "preseed_filename=$PRESEED_FILENAME"                   \
         -var "node_version=$NODE_VERSION"                           \
         ${PACKER_TEMPLATE}
 
