@@ -1,47 +1,49 @@
 {
   "variables": {
 
-    "home":                     "{{env `HOME`}}",
+    "home":                           "{{env `HOME`}}",
 
-    "image_iso_url":            "",
-    "image_iso_checksum":       "",
-    "image_iso_checksum_type":  "",
+    "image_iso_url":                  "",
+    "image_iso_checksum":             "",
+    "image_iso_checksum_type":        "",
 
-    "image_output_name":        "",
-    "image_output_description": "",
-    "image_output_version":     "",
+    "image_output_name":              "",
+    "image_output_description":       "",
+    "image_output_version":           "",
 
-    "instance_name":            "",
-    "instance_domain_name":     "",
-    "instance_vcpu":            "",
-    "instance_memory":          "",
+    "instance_name":                  "",
+    "instance_domain_name":           "",
+    "instance_vcpu":                  "",
+    "instance_memory":                "",
 
-    "aws_ssh_username":         "",
-    "aws_ssh_keypair_name":     "",
-    "aws_ssh_private_key_file": "",
+    "aws_ssh_username":               "",
+    "aws_ssh_keypair_name":           "",
+    "aws_ssh_private_key_file":       "",
 
-    "aws_region":               "",
-    "aws_vpc_id":               "",
-    "aws_subnet_id":            "",
-    "aws_source_image":         "",
-    "aws_instance_type":        "",
-    "aws_security_groups":      "",
+    "aws_region":                     "",
+    "aws_vpc_id":                     "",
+    "aws_subnet_id":                  "",
+    "aws_source_image":               "",
+    "aws_instance_type":              "",
+    "aws_security_groups":            "",
 
-    "gcp_account_file":         "",
-    "gcp_project_id":           "",
-    "gcp_project_name":         "",
-    "gcp_zone":                 "",
-    "gcp_ssh_username":         "",
-    "gcp_source_image":         "",
+    "gcp_account_file":               "",
+    "gcp_project_id":                 "",
+    "gcp_project_name":               "",
+    "gcp_zone":                       "",
+    "gcp_ssh_username":               "",
+    "gcp_source_image":               "",
 
-    "vbox_version":             "",
-    "vbox_guest_additions_url": "",
-    "vbox_ssh_user_fullname":   "",
-    "vbox_ssh_username":        "",
-    "vbox_ssh_password":        "",
-    "vbox_shared_folder_root_path":  "",
+    "vbox_version":                   "",
+    "vbox_guest_additions_url":       "",
+    "vbox_disk_size":                 "",
+    "vbox_ssh_user_fullname":         "",
+    "vbox_ssh_username":              "",
+    "vbox_ssh_password":              "",
+    "vbox_hostonly_network_name":     "",
+    "vbox_shared_folder_root_path":   "",
 
-    "preseed_filename":         ""
+    "preseed_filename":               ""
   },
   "builders": [
     {
@@ -121,7 +123,7 @@
       "headless":           true,
       "http_directory":     "http",
 
-      "disk_size":          81920,
+      "disk_size":          "{{ user `vbox_disk_size` }}",
 
       "ssh_username":       "{{ user `vbox_ssh_username` }}",
       "ssh_password":       "{{ user `vbox_ssh_password` }}",
@@ -150,6 +152,7 @@
         " netcfg/get_hostname={{ user `instance_name` }}<wait>",
         " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
+        " netcfg/choose_interface=eth0<wait>",
         " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
         " -- <wait>",
         "<enter><wait>"
@@ -165,7 +168,7 @@
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2224,,  22" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1", "ssh         ,tcp,127.0.0.1, 2224,,  22" ],
         ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_root_path` }}/{{ user `image_output_name` }}/data", "--automount"]
       ]
     },
@@ -299,8 +302,14 @@
     {
       "type":   "shell",
       "scripts": [
+        "scripts/ubuntu/create-ubuntu-temp-dirs.sh",
         "scripts/serverspec/create-serverspec-temp-dirs.sh"
       ]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/ubuntu/configs/",
+      "destination":  "/tmp/ubuntu/configs/"
     },
     {
       "type":         "file",
