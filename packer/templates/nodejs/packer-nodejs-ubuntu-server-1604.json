@@ -369,8 +369,8 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/angular/angular-yarn.sh",
-        "scripts/firebase/firebase-yarn.sh"
+        "scripts/angular/angular-npm.sh",
+        "scripts/firebase/firebase-npm.sh"
       ]
     },
     {
