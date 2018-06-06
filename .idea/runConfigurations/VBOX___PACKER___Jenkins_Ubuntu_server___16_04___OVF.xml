@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VBOX - PACKER - Jenkins Ubuntu server - 16.04 - OVF" type="BashConfigurationType" factoryName="Bash" folderName="VBOX">
+    <module name="devpaas" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="INTERPRETER_PATH" value="$INTERPRETER_PATH$" />
+    <option name="WORKING_DIRECTORY" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer\VBOX-build-image-devpaas-jenkins-ubuntu-server-1604.sh" />
+    <option name="PARAMETERS" value="virtualbox-ovf &quot;&quot; &quot;http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso&quot; &quot;0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2&quot; sha256 jenkins-ubuntu-server-1604 0.0.1 5.2.12 &quot;https://download.virtualbox.org/virtualbox/5.2.12/VBoxGuestAdditions_5.2.12.iso&quot; Administrator mmadmin packer &quot;/c/deployments&quot; &quot;deployments/base-ubuntu-server-1604/base-ubuntu-server-1604-0.0.1.ovf&quot; preseed-jenkins-ubuntu-server-1604.cfg 2 3072 marmac-hq.private" />
+    <method />
+  </configuration>
+</component>
