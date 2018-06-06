@@ -10,8 +10,9 @@
     "image_output_name":              "",
     "image_output_description":       "",
     "image_output_version":           "",
+    "image_instance_name":            "",
 
-    "instance_name":                  "",
+    "vm_host_name":                   "",
     "instance_domain_name":           "",
     "instance_vcpu":                  "",
     "instance_memory":                "",
@@ -82,7 +83,7 @@
 
       "zone":                     "{{ user `gcp_zone` }}",
       "source_image":             "{{ user `gcp_source_image` }}",
-      "instance_name":            "{{ user `instance_name` }}",
+      "instance_name":            "{{ user `image_instance_name` }}",
 
       "ssh_username":             "{{ user `gcp_ssh_username` }}",
 
@@ -104,7 +105,7 @@
 
       "shutdown_command":   "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
 
-      "vm_name":            "{{ user `instance_name` }}",
+      "vm_name":            "{{ user `image_instance_name` }}",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
@@ -150,7 +151,7 @@
         " keyboard-configuration/layout=USA<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " locale=en_US<wait>",
-        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
         " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
         " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
@@ -163,7 +164,7 @@
       "guest_additions_mode":     "upload",
       "guest_additions_url":      "{{ user `vbox_guest_additions_url` }}",
       "guest_additions_path":     "VBoxGuestAdditions_{{ user `vbox_version` }}.iso",
-      "vm_name":                  "{{ user `instance_name` }}",
+      "vm_name":                  "{{ user `image_instance_name` }}",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
@@ -196,7 +197,7 @@
         " keyboard-configuration/layout=USA<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " locale=en_US<wait>",
-        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
         " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
         " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
@@ -241,6 +242,7 @@
       "type":   "shell",
       "scripts": [
         "scripts/ubuntu/create-ubuntu-temp-dirs.sh",
+        "scripts/serverspec/create-serverspec-temp-dirs.sh",
         "scripts/jenkins/create-jenkins-temp-dirs.sh"
       ]
     },
@@ -268,6 +270,17 @@
       "type":         "file",
       "source":       "resources/jenkins/tests/",
       "destination":  "/tmp/jenkins/tests/"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/ubuntu/network-setup-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "USER_USERNAME={{ user `vbox_ssh_username` }}",
+        "VM_HOST_NAME={{ user `vm_host_name` }}",
+        "IMAGE_INSTANCE_NAME={{ user `image_instance_name` }}"
+      ]
     },
     {
       "type": "shell",
