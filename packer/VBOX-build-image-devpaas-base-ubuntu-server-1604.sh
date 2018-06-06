@@ -59,8 +59,13 @@ export INSTANCE_VCPU=${17}                  # ex. 2
 export INSTANCE_MEMORY=${18}                # ex. 1024 = 1Gb
 export INSTANCE_DOMAIN_NAME=${19}           # ex. domain-name.local
 
-export INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-$(($RANDOM%100))"
-echo "Instance Name ${INSTANCE_NAME}, that will be created in ${PACKER_PROVIDERS_LIST}"
+
+
+export IMAGE_INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
+echo "Image Instance Name ${IMAGE_INSTANCE_NAME}, that will be created in ${PACKER_PROVIDERS_LIST}"
+
+export VM_HOST_NAME="${IMAGE_OUTPUT_NAME}-$(($RANDOM%100))"
+echo "VM Hostname: ${VM_HOST_NAME}"
 
 echo "Creating packer log file name ..."
 export PACKER_LOGS_FILENAME="VBOX-${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}.log"
@@ -86,11 +91,11 @@ echo "Absolute Path for the shared folder: ${SHARED_FOLDER_ABS_PATH}"
 mkdir -p ${SHARED_FOLDER_ABS_PATH}
 
 echo "Create the preseed ${PRESEED_FILENAME} file from the template ..."
-sed "s/HOST_NAME/${INSTANCE_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" http/preseed-ubuntu-server-1604.template > http/${PRESEED_FILENAME}
+sed "s/HOST_NAME/${VM_HOST_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" http/preseed-ubuntu-server-1604.template > http/${PRESEED_FILENAME}
 sed "s/USER_FULL_NAME/${VBOX_SSH_USER_FULL_NAME}/g; s/USER_USERNAME/${VBOX_SSH_USERNAME}/g; s/USER_PASSWORD/${VBOX_SSH_PASSWORD}/g" http/preseed-ubuntu-server-1604.template > http/${PRESEED_FILENAME}
 
 echo "Preconfigure the /etc/hosts file file from the template ..."
-sed "s/HOST_NAME/${INSTANCE_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" resources/ubuntu/configs/etc-hosts.template > resources/ubuntu/configs/etc-hosts-${INSTANCE_NAME}
+sed "s/HOST_NAME/${VM_HOST_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" resources/ubuntu/configs/etc-hosts.template > resources/ubuntu/configs/etc-hosts-${IMAGE_INSTANCE_NAME}
 
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
@@ -100,17 +105,18 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                              \
         -var "image_iso_checksum_type=${IMAGE_ISO_CHECKSUM_TYPE}"           \
         -var "image_output_name=${IMAGE_OUTPUT_NAME}"                       \
         -var "image_output_version=${IMAGE_OUTPUT_VERSION}"                 \
-        -var "instance_name=${INSTANCE_NAME}"                               \
+        -var "image_instance_name=${IMAGE_INSTANCE_NAME}"                         \
         -var "instance_domain_name=${INSTANCE_DOMAIN_NAME}"                 \
         -var "instance_vcpu=${INSTANCE_VCPU}"                               \
         -var "instance_memory=${INSTANCE_MEMORY}"                           \
+        -var "vm_host_name=${VM_HOST_NAME}"                                 \
         -var "vbox_version=${VBOX_VERSION}"                                 \
         -var "vbox_guest_additions_url=${VBOX_GUEST_ADDITIONS_URL}"         \
         -var "vbox_disk_size=${VBOX_DISK_SIZE}"                             \
         -var "vbox_ssh_username=${VBOX_SSH_USERNAME}"                       \
         -var "vbox_ssh_password=${VBOX_SSH_PASSWORD}"                       \
         -var "vbox_ova_source_path=${VBOX_OVA_SOURCE_PATH}"                 \
-        -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}" \
+        -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
         ${PACKER_TEMPLATE}
 
@@ -120,17 +126,18 @@ packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}    
         -var "image_iso_checksum_type=${IMAGE_ISO_CHECKSUM_TYPE}"           \
         -var "image_output_name=${IMAGE_OUTPUT_NAME}"                       \
         -var "image_output_version=${IMAGE_OUTPUT_VERSION}"                 \
-        -var "instance_name=${INSTANCE_NAME}"                               \
+        -var "image_instance_name=${IMAGE_INSTANCE_NAME}"                   \
         -var "instance_domain_name=${INSTANCE_DOMAIN_NAME}"                 \
         -var "instance_vcpu=${INSTANCE_VCPU}"                               \
         -var "instance_memory=${INSTANCE_MEMORY}"                           \
+        -var "vm_host_name=${VM_HOST_NAME}"                                 \
         -var "vbox_version=${VBOX_VERSION}"                                 \
         -var "vbox_guest_additions_url=${VBOX_GUEST_ADDITIONS_URL}"         \
         -var "vbox_disk_size=${VBOX_DISK_SIZE}"                             \
         -var "vbox_ssh_username=${VBOX_SSH_USERNAME}"                       \
         -var "vbox_ssh_password=${VBOX_SSH_PASSWORD}"                       \
         -var "vbox_ova_source_path=${VBOX_OVA_SOURCE_PATH}"                 \
-        -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}" \
+        -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
         ${PACKER_TEMPLATE}
 
