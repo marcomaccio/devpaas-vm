@@ -1,47 +1,50 @@
 {
   "variables": {
 
-    "home":                     "{{env `HOME`}}",
+    "home":                           "{{env `HOME`}}",
 
-    "image_iso_url":            "",
-    "image_iso_checksum":       "",
-    "image_iso_checksum_type":  "",
+    "image_iso_url":                  "",
+    "image_iso_checksum":             "",
+    "image_iso_checksum_type":        "",
 
-    "image_output_name":        "",
-    "image_output_description": "",
-    "image_output_version":     "",
+    "image_output_name":              "",
+    "image_output_description":       "",
+    "image_output_version":           "",
+    "image_instance_name":            "",
 
-    "instance_name":            "",
-    "instance_domain_name":     "",
-    "instance_vcpu":            "",
-    "instance_memory":          "",
+    "vm_host_name":                   "",
+    "instance_domain_name":           "",
+    "instance_vcpu":                  "",
+    "instance_memory":                "",
 
-    "aws_ssh_username":         "",
-    "aws_ssh_keypair_name":     "",
-    "aws_ssh_private_key_file": "",
+    "aws_ssh_username":               "",
+    "aws_ssh_keypair_name":           "",
+    "aws_ssh_private_key_file":       "",
 
-    "aws_region":               "",
-    "aws_vpc_id":               "",
-    "aws_subnet_id":            "",
-    "aws_source_image":         "",
-    "aws_instance_type":        "",
-    "aws_security_groups":      "",
+    "aws_region":                     "",
+    "aws_vpc_id":                     "",
+    "aws_subnet_id":                  "",
+    "aws_source_image":               "",
+    "aws_instance_type":              "",
+    "aws_security_groups":            "",
 
-    "gcp_account_file":         "",
-    "gcp_project_id":           "",
-    "gcp_project_name":         "",
-    "gcp_zone":                 "",
-    "gcp_ssh_username":         "",
-    "gcp_source_image":         "",
+    "gcp_account_file":               "",
+    "gcp_project_id":                 "",
+    "gcp_project_name":               "",
+    "gcp_zone":                       "",
+    "gcp_ssh_username":               "",
+    "gcp_source_image":               "",
 
-    "vbox_version":             "",
-    "vbox_guest_additions_url": "",
-    "vbox_ssh_user_fullname":   "",
-    "vbox_ssh_username":        "",
-    "vbox_ssh_password":        "",
-    "vbox_shared_folder_root_path":  "",
+    "vbox_version":                   "",
+    "vbox_guest_additions_url":       "",
+    "vbox_disk_size":                 "",
+    "vbox_ssh_user_fullname":         "",
+    "vbox_ssh_username":              "",
+    "vbox_ssh_password":              "",
+    "vbox_hostonly_network_name":     "",
+    "vbox_shared_folder_abs_path":    "",
 
-    "preseed_filename":         ""
+    "preseed_filename":               ""
   },
   "builders": [
     {
@@ -80,7 +83,7 @@
 
       "zone":                     "{{ user `gcp_zone` }}",
       "source_image":             "{{ user `gcp_source_image` }}",
-      "instance_name":            "{{ user `instance_name` }}",
+      "instance_name":            "{{ user `image_instance_name` }}",
 
       "ssh_username":             "{{ user `gcp_ssh_username` }}",
 
@@ -102,7 +105,7 @@
 
       "shutdown_command":   "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
 
-      "vm_name":            "{{ user `instance_name` }}",
+      "vm_name":            "{{ user `image_instance_name` }}",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
@@ -122,7 +125,7 @@
       "headless":           true,
       "http_directory":     "http",
 
-      "disk_size":          81920,
+      "disk_size":          "{{ user `vbox_disk_size` }}",
 
       "ssh_username":       "{{ user `vbox_ssh_username` }}",
       "ssh_password":       "{{ user `vbox_ssh_password` }}",
@@ -148,7 +151,7 @@
         " keyboard-configuration/layout=USA<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " locale=en_US<wait>",
-        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
         " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
         " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
@@ -161,14 +164,14 @@
       "guest_additions_mode":     "upload",
       "guest_additions_url":      "{{ user `vbox_guest_additions_url` }}",
       "guest_additions_path":     "VBoxGuestAdditions_{{ user `vbox_version` }}.iso",
-      "vm_name":                  "{{ user `instance_name` }}",
+      "vm_name":                  "{{ user `image_instance_name` }}",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "ssh      ,tcp,,2225,,  22" ],
-        [ "modifyvm", "{{.Name}}", "--natpf1",   "jenkins  ,tcp,,8090,,8080" ],
-        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_root_path` }}/{{ user `image_output_name` }}/data", "--automount"]
+        [ "modifyvm", "{{.Name}}", "--natpf1", "ssh      ,tcp,127.0.0.1,2224,,  22" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1", "jenkins  ,tcp,127.0.0.1,8090,,8080" ],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_abs_path` }}", "--automount"]
       ]
     },
     {
@@ -194,7 +197,7 @@
         " keyboard-configuration/layout=USA<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " locale=en_US<wait>",
-        " netcfg/get_hostname={{ user `instance_name` }}<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
         " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
         " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
@@ -238,9 +241,15 @@
     {
       "type":   "shell",
       "scripts": [
+        "scripts/ubuntu/create-ubuntu-temp-dirs.sh",
         "scripts/serverspec/create-serverspec-temp-dirs.sh",
         "scripts/jenkins/create-jenkins-temp-dirs.sh"
       ]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/ubuntu/configs/",
+      "destination":  "/tmp/ubuntu/configs/"
     },
     {
       "type":         "file",
@@ -261,6 +270,17 @@
       "type":         "file",
       "source":       "resources/jenkins/tests/",
       "destination":  "/tmp/jenkins/tests/"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/ubuntu/network-setup-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "USER_USERNAME={{ user `vbox_ssh_username` }}",
+        "VM_HOST_NAME={{ user `vm_host_name` }}",
+        "IMAGE_INSTANCE_NAME={{ user `image_instance_name` }}"
+      ]
     },
     {
       "type": "shell",
