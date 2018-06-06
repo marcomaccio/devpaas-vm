@@ -16,9 +16,10 @@
 
 SECONDS=0
 echo " Start: " `date`
-DEPLOYMENT_DIR=$1       #ex. $1=deployment
-IMAGE_NAME=$2           #ex. $2=mm-base-ubuntu-server-1604  - omit extension .tar.gz
-IMAGE_VERSION=$3        #ex. $3=0.0.1
+DEPLOYMENT_DIR=${1}         # ex. $1=deployment
+IMAGE_NAME=${2}             # ex. $2=mm-base-ubuntu-server-1604  - omit extension .tar.gz
+IMAGE_VERSION=${3}          # ex. $3=0.0.1
+VM_NAME=${4}                # ex. $4=base-ubu-srv-XX where XX is a random number 0 < XX < 100
 
 echo "****** List all the VM in Virtual Box ******"
 vboxmanage list vms
@@ -26,22 +27,22 @@ vboxmanage list vms
 echo "****** List all running VMs in Virtual Box ******"
 vboxmanage list runningvms
 
-echo "****** Show VM info for: $IMAGE_NAME-$IMAGE_VERSION in Virtual Box ******"
-vboxmanage showvminfo $IMAGE_NAME-$IMAGE_VERSION
+echo "****** Show VM info for: ${VM_NAME} in Virtual Box ******"
+vboxmanage showvminfo ${VM_NAME}
 
-echo "****** Stop the VM: $IMAGE_NAME-$IMAGE_VERSION in Virtual Box ******"
-vboxmanage controlvm $IMAGE_NAME-$IMAGE_VERSION poweroff
+echo "****** Stop the VM: ${VM_NAME} in Virtual Box ******"
+vboxmanage controlvm ${VM_NAME} poweroff
 sleep 10s
 
-echo "****** Unregister the VM: $IMAGE_NAME-$IMAGE_VERSION in Virtual Box and delete all its files ******"
-vboxmanage unregistervm $IMAGE_NAME-$IMAGE_VERSION --delete
+echo "****** Unregister the VM: ${VM_NAME} in Virtual Box and delete all its files ******"
+vboxmanage unregistervm ${VM_NAME} --delete
 
-echo "****** Delete deployment dir $DEPLOYMENT_DIR/$IMAGE_NAME ******"
-rm -rf $DEPLOYMENT_DIR/$IMAGE_NAME
+echo "****** Delete deployment dir ${DEPLOYMENT_DIR}/${IMAGE_NAME} ******"
+rm -rf ${DEPLOYMENT_DIR}/${IMAGE_NAME}
 
-echo "****** Delete deployed tar.gz file: $DEPLOYMENT_DIR/$IMAGE_NAME ******"
-rm -f $DEPLOYMENT_DIR/${IMAGE_NAME}.tar.gz
+echo "****** Delete deployed tar.gz file: ${DEPLOYMENT_DIR}/${IMAGE_NAME} ******"
+rm -f ${DEPLOYMENT_DIR}/${IMAGE_NAME}.tar.gz
 
-duration=$SECONDS
+duration=${SECONDS}
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 echo " End: " `date`
