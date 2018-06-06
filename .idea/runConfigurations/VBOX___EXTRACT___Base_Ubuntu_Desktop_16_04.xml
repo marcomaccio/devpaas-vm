@@ -6,7 +6,7 @@
     <option name="WORKING_DIRECTORY" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/packer/VBOX-1-extract-image.sh" />
-    <option name="PARAMETERS" value="deployments base-ubuntu-desktop-1604 0.0.1" />
+    <option name="PARAMETERS" value="deployments base-ubu-dsk-1604 0.0.1" />
     <method />
   </configuration>
 </component>
