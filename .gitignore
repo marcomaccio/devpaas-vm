@@ -48,3 +48,6 @@ packer/http/preseed-*.cfg
 
 # Visual Studo Code files
 .vscode/
+
+# Specific project files 
+etc-hosts-*
