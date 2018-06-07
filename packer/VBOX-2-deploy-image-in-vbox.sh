@@ -34,6 +34,9 @@ vboxmanage import ${DEPLOYMENT_DIR}/${IMAGE_NAME}/${IMAGE_NAME}-${IMAGE_VERSION}
 echo "****** List all the VM in Virtual Box ******"
 vboxmanage list vms
 
+echo "****** Enable symlinks in VM shared Folder ******"
+VBoxManage setextradata ${VM_NAME} VBoxInternal2/SharedFoldersEnableSymlinksCreate/data 1
+
 echo "****** Start the VM in Virtual Box ******"
 vboxmanage startvm --type gui ${VM_NAME}
 
