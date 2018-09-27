@@ -17,8 +17,8 @@ node --version
 
 npm --version
 
-echo "Clear the cache"
-npm cache verify
+#echo "Clear the cache"
+#npm cache verify
 
 sudo npm install -g pm2
 
