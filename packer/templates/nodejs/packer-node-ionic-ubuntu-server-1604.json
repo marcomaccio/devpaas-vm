@@ -342,6 +342,7 @@
       "type": "shell",
       "scripts": [
         "scripts/git/git-ubuntu.sh",
+        "scripts/pip/pip-ubuntu.sh",
         "scripts/docker/docker-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "hyperv-iso", "amazon-ebs", "googlecompute"]
@@ -365,21 +366,15 @@
       "type": "shell",
       "scripts": [
         "scripts/angular/angular-npm.sh",
-        "scripts/firebase/firebase-npm.sh"
+        "scripts/firebase/firebase-npm.sh",
+        "scripts/cordova/cordova-npm.sh",
+        "scripts/ionic/ionic-npm.sh"
       ]
     },
     {
       "type": "shell",
       "scripts": [
         "scripts/os-upgrade-ubuntu.sh"
-      ],
-      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
-      "expect_disconnect": true
-    },
-    {
-      "type": "shell",
-      "scripts": [
-        "scripts/os-desktop-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
       "expect_disconnect": true
