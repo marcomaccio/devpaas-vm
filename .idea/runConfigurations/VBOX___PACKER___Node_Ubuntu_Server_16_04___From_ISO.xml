@@ -5,8 +5,8 @@
     <option name="WORKING_DIRECTORY" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SCRIPT_NAME" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer\VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh" />
-    <option name="PARAMETERS" value="virtualbox-iso &quot;&quot; &quot;http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso&quot; &quot;0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2&quot; sha256 node-ubu-srv-1604 0.0.2 5.2.12 &quot;https://download.virtualbox.org/virtualbox/5.2.12/VBoxGuestAdditions_5.2.12.iso&quot; 92160 Administrator mmadmin packer &quot;vm-deployments&quot; &quot; &quot; preseed-nodejs-ubuntu-server-1604.cfg 2 2048 marmac-hq.private &quot;8&quot;" />
+    <option name="PARAMETERS" value="virtualbox-iso &quot;&quot; &quot;http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso&quot; &quot;0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2&quot; sha256 node8-ubu-srv-1604 0.0.2 5.2.18 &quot;https://download.virtualbox.org/virtualbox/5.2.18/VBoxGuestAdditions_5.2.18.iso&quot; 92160 Administrator mmadmin packer &quot;vm-deployments&quot; &quot; &quot; preseed-node8-ubuntu-server-1604.cfg 2 2048 marmac-hq.private &quot;8&quot;" />
     <module name="" />
-    <method />
+    <method v="2" />
   </configuration>
 </component>
