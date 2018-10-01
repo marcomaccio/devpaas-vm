@@ -1,2 +1,2 @@
-127.0.0.1       localhost
-127.0.1.1       HOST_NAME    HOST_NAME.DOMAIN_NAME
+127.0.0.1       localhost 
+VM_IP_ADDRESS   HOST_NAME    HOST_NAME.DOMAIN_NAME   
