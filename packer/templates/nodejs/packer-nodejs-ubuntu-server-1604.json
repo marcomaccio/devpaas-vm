@@ -341,12 +341,7 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/java/java-jdk-ubuntu.sh",
-        "scripts/graphviz/graphviz-ubuntu.sh",
         "scripts/git/git-ubuntu.sh",
-        "scripts/pip/pip-ubuntu.sh",
-        "scripts/awscli/awscli.sh",
-        "scripts/openstackcli/openstackcli.sh",
         "scripts/docker/docker-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "hyperv-iso", "amazon-ebs", "googlecompute"]
@@ -377,6 +372,14 @@
       "type": "shell",
       "scripts": [
         "scripts/os-upgrade-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
+      "expect_disconnect": true
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-desktop-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
       "expect_disconnect": true
