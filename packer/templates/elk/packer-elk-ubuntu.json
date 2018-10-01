@@ -1,43 +1,58 @@
 {
   "variables": {
-    "atlas_username":           "",
-    "atlas_token":              "",
 
-    "home":                     "{{env `HOME`}}",
+    "home":                           "{{env `HOME`}}",
 
-    "instance_name":            "mm-devpaas-elk-ubuntu-v{{isotime \"20060102-0101\"}}",
-    "image_name":               "mm-devpaas-elk-ubuntu-v{{isotime \"20060102-0101\"}}",
-    "image_description":        "MM DevPaas ELK Ubuntu 16.04 VM Image",
-    "image_version":            "0.1",
+    "image_iso_url":                  "",
+    "image_iso_checksum":             "",
+    "image_iso_checksum_type":        "",
 
-    "aws_ssh_username":         "",
-    "aws_ssh_keypair_name":     "",
-    "aws_ssh_private_key_file": "",
+    "image_output_name":              "",
+    "image_output_description":       "",
+    "image_output_version":           "",
+    "image_instance_name":            "",
 
-    "aws_region":               "",
-    "aws_vpc_id":               "",
-    "aws_subnet_id":            "",
-    "aws_source_image":         "",
-    "aws_instance_type":        "",
-    "aws_security_groups":      "",
+    "vm_host_name":                   "",
+    "instance_domain_name":           "",
+    "instance_vcpu":                  "",
+    "instance_memory":                "",
 
-    "gcp_account_file":         "",
-    "gcp_project_id":           "",
-    "gcp_project_name":         "",
-    "gcp_zone":                 "",
-    "gcp_ssh_username":         "",
-    "gcp_source_image":         "",
+    "aws_ssh_username":               "",
+    "aws_ssh_keypair_name":           "",
+    "aws_ssh_private_key_file":       "",
 
-    "vbox_ssh_username":          "",
-    "vbox_ssh_password":          ""
+    "aws_region":                     "",
+    "aws_vpc_id":                     "",
+    "aws_subnet_id":                  "",
+    "aws_source_image":               "",
+    "aws_instance_type":              "",
+    "aws_security_groups":            "",
+
+    "gcp_account_file":               "",
+    "gcp_project_id":                 "",
+    "gcp_project_name":               "",
+    "gcp_zone":                       "",
+    "gcp_ssh_username":               "",
+    "gcp_source_image":               "",
+
+    "vbox_version":                   "",
+    "vbox_guest_additions_url":       "",
+    "vbox_disk_size":                 "",
+    "vbox_ssh_user_fullname":         "",
+    "vbox_ssh_username":              "",
+    "vbox_ssh_password":              "",
+    "vbox_hostonly_network_name":     "",
+    "vbox_shared_folder_abs_path":    "",
+
+    "preseed_filename":               ""
   },
   "builders": [
     {
       "type":                     "amazon-ebs",
 
       "ami_virtualization_type":  "hvm",
-      "ami_name":                 "{{ user `image_name`         }}",
-      "ami_description":          "{{ user `image_description`  }} AMI",
+      "ami_name":                 "{{ user `image_output_name`         }}",
+      "ami_description":          "{{ user `image_output_description`  }} AMI",
 
       "ssh_pty":                  "true",
       "ssh_username":             "{{ user `aws_ssh_username`         }}",
@@ -51,8 +66,8 @@
       "instance_type":            "{{ user `aws_instance_type` }}",
       "security_group_id":        "{{ user `aws_security_groups` }}",
 
-      "run_tags":         { "ami-create": "{{ user `image_name`}}" },
-      "tags":             { "ami": "{{ user `image_name`}}"},
+      "run_tags":         { "ami-create": "{{ user `image_output_name`}}" },
+      "tags":             { "ami": "{{ user `image_output_name`}}"},
 
       "associate_public_ip_address": true
 
@@ -60,37 +75,65 @@
     {
       "type":                     "googlecompute",
 
-      "image_name":               "{{ user `image_name` }}",
-      "image_description":        "{{ user `image_description` }}",
+      "image_name":               "{{ user `image_output_name` }}",
+      "image_description":        "{{ user `image_output_description` }}",
 
       "account_file":             "{{ user `gcp_account_file` }}",
       "project_id":               "{{ user `gcp_project_id` }}",
 
       "zone":                     "{{ user `gcp_zone` }}",
       "source_image":             "{{ user `gcp_source_image` }}",
-      "instance_name":            "{{ user `instance_name` }}",
+      "instance_name":            "{{ user `image_instance_name` }}",
 
       "ssh_username":             "{{ user `gcp_ssh_username` }}",
 
       "communicator":             "ssh"
     },
     {
-      "type": "virtualbox-iso",
+      "type":               "virtualbox-ovf",
+      "source_path":        "{{ user `vbox_ova_source_path` }}",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+
+      "export_opts": [
+        "--vsys", "0", "--manifest", "--description", "{{user `image_output_description`}}", "--version", "{{user `image_output_version`}}", "--ovf20"
+      ],
+      "format":             "ovf",
+
+      "headless":           true,
+
+      "shutdown_command":   "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+
+      "vm_name":            "{{ user `image_instance_name` }}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ]
+      ]
+    },
+    {
+      "type":               "virtualbox-iso",
       "guest_os_type":      "Ubuntu_64",
-      "format":             "ova",
+
+      "export_opts": [
+        "--vsys", "0", "--manifest", "--description", "{{user `image_output_description`}}", "--version", "{{user `image_output_version`}}", "--ovf20"
+      ],
+      "format":             "ovf",
+
       "headless":           true,
       "http_directory":     "http",
 
-      "disk_size":          81920,
+      "disk_size":          "{{ user `vbox_disk_size` }}",
 
       "ssh_username":       "{{ user `vbox_ssh_username` }}",
       "ssh_password":       "{{ user `vbox_ssh_password` }}",
       "ssh_wait_timeout":   "10000s",
       "ssh_pty" :           true,
 
-      "iso_checksum_type":  "sha256",
-      "iso_checksum":       "a06cd926f5855d4f21fb4bc9978a35312f815fbda0d0ef7fdc846861f4fc4600",
-      "iso_url":            "http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso",
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
 
       "boot_wait": "10s",
       "boot_command": [
@@ -107,22 +150,26 @@
         " keyboard-configuration/layout=USA<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " locale=en_US<wait>",
-        " netcfg/get_hostname=mm-devpaas-elk-ubuntu<wait>",
-        " netcfg/get_domain=marmac.labs<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
         " noapic<wait>",
-        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
         " -- <wait>",
         "<enter><wait>"
       ],
 
-      "shutdown_command":   "echo 'packer' | sudo -S shutdown -P now",
+      "shutdown_command":         "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
       "virtualbox_version_file":  ".vbox_version",
-      "guest_additions_path":     "VBoxGuestAdditions_{{.Version}}.iso",
-      "vm_name":                  "{{user `instance_name`}}",
+      "guest_additions_mode":     "upload",
+      "guest_additions_url":      "{{ user `vbox_guest_additions_url` }}",
+      "guest_additions_path":     "VBoxGuestAdditions_{{ user `vbox_version` }}.iso",
+      "vm_name":                  "{{ user `image_instance_name` }}",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", "3072" ],
-        [ "modifyvm", "{{.Name}}", "--cpus"  ,    "2" ],
-        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ]
+        [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1", "ssh      ,tcp,127.0.0.1,2224,,  22" ],
+        ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_abs_path` }}", "--automount"]
       ]
     }
   ],
@@ -130,18 +177,44 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/virtualbox/virtualbox-ubuntu.sh",
-        "scripts/vagrant.sh"
+        "scripts/virtualbox/virtualbox-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "VBOX_VERSION={{ user `vbox_version` }}"
       ],
       "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
       "only": ["virtualbox-iso"]
     },
     {
+      "type": "shell",
+      "scripts": [
+        "scripts/vagrant/vagrant.sh"
+      ],
+      "environment_vars": [
+        "VBOX_VERSION={{ user `vbox_version` }}"
+      ],
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "only": ["virtualbox-iso", "hyperv-iso", "vmware-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/os-update-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "hyperv-iso", "vmware-iso"]
+    },
+    {
       "type":   "shell",
       "scripts": [
+        "scripts/ubuntu/create-ubuntu-temp-dirs.sh",
         "scripts/serverspec/create-serverspec-temp-dirs.sh",
         "scripts/elk/create-elk-temp-dirs.sh"
       ]
+    },
+    {
+      "type":         "file",
+      "source":       "resources/ubuntu/configs/",
+      "destination":  "/tmp/ubuntu/configs/"
     },
     {
       "type":         "file",
@@ -166,6 +239,25 @@
     {
       "type": "shell",
       "scripts": [
+        "scripts/ubuntu/network-setup-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "USER_USERNAME={{ user `vbox_ssh_username` }}",
+        "VM_HOST_NAME={{ user `vm_host_name` }}",
+        "IMAGE_INSTANCE_NAME={{ user `image_instance_name` }}"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/serverspec/serverspec-core-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "hyperv-iso"]
+    },
+
+    {
+      "type": "shell",
+      "scripts": [
         "scripts/os_update-ubuntu.sh",
         "scripts/serverspec/serverspec-core-ubuntu.sh"
       ]
@@ -176,7 +268,8 @@
         "scripts/java/java-jdk-ubuntu.sh",
         "scripts/graphviz/graphviz-ubuntu.sh",
         "scripts/git/git-ubuntu.sh"
-      ]
+      ],
+      "only": ["virtualbox-iso", "hyperv-iso", "amazon-ebs", "googlecompute"]
     },
     {
       "type": "shell",
@@ -190,6 +283,14 @@
     {
       "type": "shell",
       "scripts": [
+        "scripts/os-upgrade-ubuntu.sh"
+      ],
+      "only": ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"],
+      "expect_disconnect": true
+    },
+    {
+      "type": "shell",
+      "scripts": [
         "scripts/serverspec/serverspec-elk.sh",
         "scripts/serverspec/serverspec-launch-test.sh"
       ]
@@ -198,21 +299,14 @@
   "post-processors": [
     {
       "type":   "compress",
-      "output": "build/{{user `image_name`}}.tar.gz",
-      "only":   ["virtualbox-iso"]
+      "output": "builds/{{user `image_output_name`}}/{{user `image_output_name`}}.tar.gz",
+      "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
     },
     [
       {
         "type":   "vagrant",
-        "output": "build/{{.Provider}}-{{ user `image_name` }}.box",
-        "only":   ["virtualbox-iso"]
-      },
-      {
-        "type":         "vagrant-cloud",
-        "box_tag":      "marcomaccio/{{ user `image_name` }}",
-        "access_token": "{{user `atlas_token`}}",
-        "version":      "{{user `image_version`}}",
-        "only":         ["virtualbox-iso"]
+        "output": "builds/{{user `image_output_name`}}/{{.Provider}}-{{ user `image_output_name` }}.box",
+        "only":   ["virtualbox-iso", "virtualbox-ovf", "hyperv-iso", "vmware-iso"]
       }
     ]
   ]
