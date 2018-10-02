@@ -60,6 +60,7 @@ export INSTANCE_MEMORY=${18}                # ex. 1024 = 1Gb
 export INSTANCE_DOMAIN_NAME=${19}           # ex. domain-name.local
 
 export NODE_VERSION=${20}                   # ex. 8
+export PACKER_TEMPLATE=${21}                # ex. templates/nodejs/packer-node-ng-ubuntu-server-1604.json
 
 export IMAGE_INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "Image Instance Name ${IMAGE_INSTANCE_NAME}, that will be created in ${PACKER_PROVIDERS_LIST}"
