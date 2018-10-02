@@ -365,7 +365,9 @@
       "type": "shell",
       "scripts": [
         "scripts/angular/angular-npm.sh",
-        "scripts/firebase/firebase-npm.sh"
+        "scripts/firebase/firebase-npm.sh",
+        "scripts/cordova/cordova-npm.sh",
+        "scripts/ionic/ionic-npm.sh"
       ]
     },
     {
