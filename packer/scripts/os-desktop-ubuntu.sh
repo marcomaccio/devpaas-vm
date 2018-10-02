@@ -7,10 +7,14 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install -y ubuntu-desktop
 
-echo "  Change permission to .Xauthority, .ICEauthority, .config "
-sudo chown $USER:$( id -g -n $USER) .Xauthority
-sudo chown $USER:$( id -g -n $USER) .ICEauthority
-sudo chown -R $USER:$( id -g -n $USER) .config/
+echo "***** Start X *****"
+
+#sudo startx
+
+#echo "  Change permission to .Xauthority, .ICEauthority, .config "
+#sudo chown $USER:$( id -g -n $USER) .Xauthority
+#sudo chown $USER:$( id -g -n $USER) .ICEauthority
+#sudo chown -R $USER:$( id -g -n $USER) .config/
 
 echo "***** installation of Ubuntu Desktop  Ended *****"
 echo "***************************************************************"
