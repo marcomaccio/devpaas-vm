@@ -364,6 +364,7 @@
     {
       "type": "shell",
       "scripts": [
+        "scripts/gcp/gcp-npm.sh",
         "scripts/angular/angular-npm.sh",
         "scripts/firebase/firebase-npm.sh",
         "scripts/cordova/cordova-npm.sh",
