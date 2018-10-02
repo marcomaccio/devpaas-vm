@@ -342,7 +342,6 @@
       "type": "shell",
       "scripts": [
         "scripts/git/git-ubuntu.sh",
-        "scripts/pip/pip-ubuntu.sh",
         "scripts/docker/docker-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "hyperv-iso", "amazon-ebs", "googlecompute"]
