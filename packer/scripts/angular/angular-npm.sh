@@ -1,11 +1,9 @@
 #!/bin/bash -eux
 
 echo "*****************************************************"
-echo "***** Start installation of Angular CLI via npm *****"
+echo "***** Start installation of Angular CLI via npm  NG Version: ${NG_VERSION} *****"
 
-sudo npm install -g @angular/cli
-
-# ng config -g cli.packageManager yarn
+sudo npm install -g @angular/cli@${NG_VERSION}
 
 echo "***** installation of Angular CLI via npm Ended *****"
 echo "*****************************************************"

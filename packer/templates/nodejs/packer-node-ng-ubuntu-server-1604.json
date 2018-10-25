@@ -45,7 +45,8 @@
     "vbox_shared_folder_abs_path":    "",
 
     "preseed_filename":               "",
-    "node_version":                   ""
+    "node_version":                   "",
+    "ng_version":                     ""
   },
   "builders": [
     {
@@ -364,8 +365,14 @@
     {
       "type": "shell",
       "scripts": [
+        "scripts/gcp/gcp-ubuntu.sh",
         "scripts/angular/angular-npm.sh",
-        "scripts/firebase/firebase-npm.sh"
+        "scripts/firebase/firebase-npm.sh",
+        "scripts/cordova/cordova-npm.sh",
+        "scripts/ionic/ionic-npm.sh"
+      ],
+      "environment_vars": [
+        "NG_VERSION={{ user `ng_version` }}"
       ]
     },
     {
