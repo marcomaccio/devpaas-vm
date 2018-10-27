@@ -60,6 +60,8 @@ export INSTANCE_MEMORY=${18}                # ex. 1024 = 1Gb
 export INSTANCE_DOMAIN_NAME=${19}           # ex. domain-name.local
 
 export NODE_VERSION=${20}                   # ex. 8
+export NG_VERSION=${21}                     # ex. 6.1.10
+export PACKER_TEMPLATE=${22}                # ex. templates/nodejs/packer-node-ng-ubuntu-server-1604.json
 
 export IMAGE_INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "Image Instance Name ${IMAGE_INSTANCE_NAME}, that will be created in ${PACKER_PROVIDERS_LIST}"
@@ -119,6 +121,7 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                              \
         -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
         -var "node_version=${NODE_VERSION}"                                 \
+        -var "ng_version=${NG_VERSION}"                                     \
         ${PACKER_TEMPLATE}
 
 packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}    \
@@ -141,6 +144,7 @@ packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}    
         -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
         -var "node_version=${NODE_VERSION}"                                 \
+        -var "ng_version=${NG_VERSION}"                                     \
         ${PACKER_TEMPLATE}
 
 duration=$SECONDS

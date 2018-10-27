@@ -97,9 +97,6 @@ sed "s/USER_FULL_NAME/${VBOX_SSH_USER_FULL_NAME}/g; s/USER_USERNAME/${VBOX_SSH_U
 echo "Preconfigure the /etc/hosts file file from the template ..."
 sed "s/HOST_NAME/${VM_HOST_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" resources/ubuntu/configs/etc-hosts.template > resources/ubuntu/configs/etc-hosts-${IMAGE_INSTANCE_NAME}
 
-echo "Preconfigure the /etc/hosts file file from the template ..."
-sed "s/HOST_NAME/${VM_HOST_NAME}/g; resources/ubuntu/configs/etc-hostname.template > resources/ubuntu/configs/etc-hostname-${IMAGE_INSTANCE_NAME}
-
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
 packer validate -only=${PACKER_PROVIDERS_LIST}                              \

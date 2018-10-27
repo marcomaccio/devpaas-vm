@@ -2,11 +2,11 @@
   <configuration default="false" name="VBOX -  DEPLOY - NODE Ubuntu Server 16.04" type="BashConfigurationType" factoryName="Bash" folderName="VBOX">
     <module name="devpaas" />
     <option name="INTERPRETER_OPTIONS" value="" />
-    <option name="INTERPRETER_PATH" value="$INTERPRETER_PATH$" />
-    <option name="WORKING_DIRECTORY" value="C:\development\sources\marcomaccio\projects\devpaas-vm\packer" />
+    <option name="INTERPRETER_PATH" value="C:\Program Files\Git\bin\bash.exe" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/packer" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/packer/VBOX-2-deploy-image-in-vbox.sh" />
-    <option name="PARAMETERS" value="deployments node-ubu-srv-1604 0.0.2" />
-    <method />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/packer\VBOX-2-deploy-image-in-vbox.sh" />
+    <option name="PARAMETERS" value="deployments node8-ubu-srv-1604 0.0.2 node8-ubu-srv-1604-76 &quot;VirtualBox Host-Only Ethernet Adapter #2&quot; &quot;192.168.1.10&quot;" />
+    <method v="2" />
   </configuration>
 </component>

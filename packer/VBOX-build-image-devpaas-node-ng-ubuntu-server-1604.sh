@@ -2,13 +2,13 @@
 
 ################################################################################################
 #
-# title:          Build Base Image based on Ubuntu 16.04
+# title:          Build NodeJS Image based on Ubuntu 16.04
 # author:         Marco Maccio (http://marmac.name)
 # url:            https://github.com/marcomaccio/devpaas-vm
-# description:    Create image for Base Image server based on Ubuntu 16.04 ISO image
+# description:    Create image for NodeJS Image server based on Ubuntu 16.04 ISO image
 #
 # to run:
-#           sh VBOX-build-image-devpaas-base-ubuntu-server-1604.sh virtualbox-iso               \
+#           sh VBOX-build-image-devpaas-nodejs-ubuntu-server-1604.sh virtualbox-iso           \
 #                                                               -debug                          \
 #                                                               IMAGE_ISO_URL                   \
 #                                                               IMAGE_ISO_CHECKSUM              \
@@ -59,7 +59,8 @@ export INSTANCE_VCPU=${17}                  # ex. 2
 export INSTANCE_MEMORY=${18}                # ex. 1024 = 1Gb
 export INSTANCE_DOMAIN_NAME=${19}           # ex. domain-name.local
 
-
+export NODE_VERSION=${20}                   # ex. 8
+export PACKER_TEMPLATE=${21}                # ex. templates/nodejs/packer-node-ng-ubuntu-server-1604.json
 
 export IMAGE_INSTANCE_NAME="${IMAGE_OUTPUT_NAME}-${IMAGE_OUTPUT_VERSION}"
 echo "Image Instance Name ${IMAGE_INSTANCE_NAME}, that will be created in ${PACKER_PROVIDERS_LIST}"
@@ -81,8 +82,8 @@ export PACKER_LOG=1
 export PACKER_LOG_PATH="./builds/packer_logs/$PACKER_LOGS_FILENAME"
 echo "The packer log file is available at ${PACKER_LOG_PATH} ..."
 
-echo "Preparing build for $PACKER_PROVIDERS_LIST ..."
-export PACKER_TEMPLATE=templates/packer-devpaas-base-ubuntu-server-1604.json
+echo "Preparing build for $PACKER_PROVIDERS_LIST the ${PACKER_TEMPLATE} ..."
+
 
 echo "Create Shared directory on the host to be mounted on the guest VM ..."
 export SHARED_FOLDER_ABS_PATH=${HOME}/${VBOX_SHARED_FOLDER_ROOT_PATH}/${IMAGE_OUTPUT_NAME}/data
@@ -96,9 +97,6 @@ sed "s/USER_FULL_NAME/${VBOX_SSH_USER_FULL_NAME}/g; s/USER_USERNAME/${VBOX_SSH_U
 
 echo "Preconfigure the /etc/hosts file file from the template ..."
 sed "s/HOST_NAME/${VM_HOST_NAME}/g; s/DOMAIN_NAME/${INSTANCE_DOMAIN_NAME}/g" resources/ubuntu/configs/etc-hosts.template > resources/ubuntu/configs/etc-hosts-${IMAGE_INSTANCE_NAME}
-
-echo "Preconfigure the /etc/hosts file file from the template ..."
-sed "s/HOST_NAME/${VM_HOST_NAME}/g; resources/ubuntu/configs/etc-hostname.template > resources/ubuntu/configs/etc-hostname-${IMAGE_INSTANCE_NAME}
 
 echo "Build the $IMAGE_OUTPUT_NAME v. $IMAGE_OUTPUT_VERSION using the packer template: $PACKER_TEMPLATE ..."
 
@@ -121,6 +119,7 @@ packer validate -only=${PACKER_PROVIDERS_LIST}                              \
         -var "vbox_ova_source_path=${VBOX_OVA_SOURCE_PATH}"                 \
         -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
+        -var "node_version=${NODE_VERSION}"                                 \
         ${PACKER_TEMPLATE}
 
 packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}    \
@@ -142,6 +141,7 @@ packer build -force -on-error=abort -only=${PACKER_PROVIDERS_LIST}  ${DEBUG}    
         -var "vbox_ova_source_path=${VBOX_OVA_SOURCE_PATH}"                 \
         -var "vbox_shared_folder_abs_path=${SHARED_FOLDER_ABS_PATH}"        \
         -var "preseed_filename=${PRESEED_FILENAME}"                         \
+        -var "node_version=${NODE_VERSION}"                                 \
         ${PACKER_TEMPLATE}
 
 duration=$SECONDS

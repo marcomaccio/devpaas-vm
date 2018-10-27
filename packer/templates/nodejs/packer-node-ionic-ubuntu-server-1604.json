@@ -44,7 +44,8 @@
     "vbox_hostonly_network_name":     "",
     "vbox_shared_folder_abs_path":    "",
 
-    "preseed_filename":               ""
+    "preseed_filename":               "",
+    "node_version":                   ""
   },
   "builders": [
     {
@@ -109,7 +110,8 @@
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--memory", "{{ user `instance_memory`  }}" ],
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
-        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ]
+        [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1", "http-angular,tcp,0.0.0.0,14200,,4200" ]
       ]
     },
     {
@@ -169,8 +171,105 @@
         [ "modifyvm", "{{.Name}}", "--cpus"  , "{{ user `instance_vcpu`    }}" ],
         [ "modifyvm", "{{.Name}}", "--vram"  ,   "32" ],
         [ "modifyvm", "{{.Name}}", "--natpf1", "ssh      ,tcp,127.0.0.1,2224,,  22" ],
+        [ "modifyvm", "{{.Name}}", "--natpf1", "http-angular,tcp,0.0.0.0,14200,,4200" ],
         ["sharedfolder", "add", "{{.Name}}", "--name", "data", "--hostpath", "{{ user `vbox_shared_folder_abs_path` }}", "--automount"]
       ]
+    },
+    {
+      "type":               "hyperv-iso",
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "shutdown_command": "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+      "http_directory":     "http"
+    },
+    {
+      "type":               "vmware-iso",
+      "guest_os_type":      "ubuntu-64",
+
+      "format":             "ovf",
+
+      "headless":           false,
+      "http_directory":     "http",
+
+      "disk_size":          "{{ user `vbox_disk_size` }}",
+
+      "ssh_username":       "{{ user `vbox_ssh_username` }}",
+      "ssh_password":       "{{ user `vbox_ssh_password` }}",
+      "ssh_wait_timeout":   "10000s",
+      "ssh_pty" :           true,
+
+      "iso_checksum_type":  "{{ user `image_iso_checksum_type` }}",
+      "iso_checksum":       "{{ user `image_iso_checksum` }}",
+      "iso_url":            "{{ user `image_iso_url` }}",
+
+      "disable_vnc":          false,
+      "vnc_disable_password": true,
+      "vnc_port_min":         "5900",
+      "vnc_port_max":         "5911",
+      "vnc_bind_address":     "0.0.0.0",
+
+      "boot_wait": "10s",
+      "boot_command": [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_hostname={{ user `vm_host_name` }}<wait>",
+        " netcfg/get_domain={{ user `instance_domain_name` }}<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/{{ user `preseed_filename` }}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+
+      "shutdown_command":         "echo '{{ user `vbox_ssh_username` }}' | sudo -S shutdown -P now",
+
+      "version":                  "9",
+      "tools_upload_flavor":      "windows",
+      "tools_upload_path":        "/var/tmp/{{.Flavor}}.iso",
+
+      "vm_name":                  "{{ user `image_instance_name` }}",
+
+      "vmx_data": {
+        "cpuid.coresPerSocket":   "1",
+        "numvcpus":               "{{ user `instance_vcpu`   }}",
+        "memsize":                "{{ user `instance_memory` }}"
+      }
     }
   ],
   "provisioners": [
@@ -208,7 +307,7 @@
       "scripts": [
         "scripts/ubuntu/create-ubuntu-temp-dirs.sh",
         "scripts/serverspec/create-serverspec-temp-dirs.sh",
-        "scripts/elk/create-elk-temp-dirs.sh"
+        "scripts/nodejs/create-nodejs-temp-dirs.sh"
       ]
     },
     {
@@ -220,21 +319,6 @@
       "type":         "file",
       "source":       "resources/serverspec/configs/",
       "destination":  "/tmp/serverspec/"
-    },
-    {
-      "type":         "file",
-      "source":       "scripts/elk/",
-      "destination":  "/tmp/elk/scripts/"
-    },
-    {
-      "type":         "file",
-      "source":       "resources/elk/configs/",
-      "destination":  "/tmp/elk/resources/"
-    },
-    {
-      "type":         "file",
-      "source":       "resources/elk/tests/",
-      "destination":  "/tmp/elk/tests/"
     },
     {
       "type": "shell",
@@ -254,30 +338,36 @@
       ],
       "only": ["virtualbox-iso", "hyperv-iso"]
     },
-
     {
       "type": "shell",
       "scripts": [
-        "scripts/os_update-ubuntu.sh",
-        "scripts/serverspec/serverspec-core-ubuntu.sh"
-      ]
-    },
-    {
-      "type": "shell",
-      "scripts": [
-        "scripts/java/java-jdk-ubuntu.sh",
-        "scripts/graphviz/graphviz-ubuntu.sh",
-        "scripts/git/git-ubuntu.sh"
+        "scripts/git/git-ubuntu.sh",
+        "scripts/docker/docker-ubuntu.sh"
       ],
       "only": ["virtualbox-iso", "hyperv-iso", "amazon-ebs", "googlecompute"]
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/elk/elk-repo-ubuntu.sh",
-        "scripts/elk/elastic-ubuntu.sh",
-        "scripts/elk/kibana-ubuntu.sh",
-        "scripts/elk/logstash-ubuntu.sh"
+        "scripts/nodejs/nodejs-ubuntu.sh"
+      ],
+      "environment_vars": [
+        "NODE_VERSION={{ user `node_version` }}"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/yarn/yarn-ubuntu.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/angular/angular-npm.sh",
+        "scripts/firebase/firebase-npm.sh",
+        "scripts/cordova/cordova-npm.sh",
+        "scripts/ionic/ionic-npm.sh"
       ]
     },
     {
@@ -291,7 +381,6 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/serverspec/serverspec-elk.sh",
         "scripts/serverspec/serverspec-launch-test.sh"
       ]
     }
