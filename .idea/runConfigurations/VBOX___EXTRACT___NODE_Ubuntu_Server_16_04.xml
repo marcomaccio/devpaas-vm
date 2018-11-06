@@ -3,10 +3,10 @@
     <module name="devpaas" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="INTERPRETER_PATH" value="C:\Program Files\Git\bin\bash.exe" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/packer" />
+    <option name="WORKING_DIRECTORY" value="C:\development\sources\ias\projects\devpaas-vm\packer" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/packer/VBOX-1-extract-image.sh" />
-    <option name="PARAMETERS" value="deployments node8-ubu-srv-1604 0.0.2 node8-ubu-srv-1604-76" />
+    <option name="PARAMETERS" value="deployments node8-ubu-srv-1604 0.0.2 node8-ubu-srv-1604" />
     <method v="2" />
   </configuration>
 </component>
